@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.28010.2048
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SinkMyBattleshipWPF", "SinkMyBattleshipWPF\SinkMyBattleshipWPF.csproj", "{BD1D4132-065F-4BCB-BA8B-E2ED16F9103E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerSinkMyBattleship", "ServerSinkMyBattleship\ServerSinkMyBattleship.csproj", "{1C2BDAE6-03A3-4051-99CD-62D04DA13F88}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientSinkMyBattleship", "ClientSinkMyBattleship\ClientSinkMyBattleship.csproj", "{D1119EDA-EE5F-49D3-91E0-A54AFB5EC8C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{BD1D4132-065F-4BCB-BA8B-E2ED16F9103E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD1D4132-065F-4BCB-BA8B-E2ED16F9103E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD1D4132-065F-4BCB-BA8B-E2ED16F9103E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C2BDAE6-03A3-4051-99CD-62D04DA13F88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C2BDAE6-03A3-4051-99CD-62D04DA13F88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C2BDAE6-03A3-4051-99CD-62D04DA13F88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C2BDAE6-03A3-4051-99CD-62D04DA13F88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1119EDA-EE5F-49D3-91E0-A54AFB5EC8C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1119EDA-EE5F-49D3-91E0-A54AFB5EC8C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1119EDA-EE5F-49D3-91E0-A54AFB5EC8C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1119EDA-EE5F-49D3-91E0-A54AFB5EC8C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
