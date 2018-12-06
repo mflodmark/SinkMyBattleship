@@ -4,6 +4,8 @@
              xmlns:local="clr-namespace:ClientSinkMyBattleship"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Application.MainWindow>
+            <NavigationWindow Source="MainPage.xaml" Visibility="Visible"></NavigationWindow>
+        </Application.MainWindow>
     </Application.Resources>
 </Application>

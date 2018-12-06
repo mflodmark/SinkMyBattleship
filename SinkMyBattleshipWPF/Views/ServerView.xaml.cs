@@ -15,18 +15,13 @@ using System.Windows.Shapes;
 namespace SinkMyBattleshipWPF.Views
 {
     /// <summary>
-    /// Interaction logic for ShellView.xaml
+    /// Interaction logic for ServerView.xaml
     /// </summary>
-    public partial class ShellView : Window
+    public partial class ServerView : Window
     {
-        public ShellView()
+        public ServerView()
         {
             InitializeComponent();
-        }
-
-        private void PlayGame_Click(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }
