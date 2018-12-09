@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace SinkMyBattleshipWPF.Views
 {
     /// <summary>
-    /// Interaction logic for ClientView.xaml
+    /// Interaction logic for MainView.xaml
     /// </summary>
-    public partial class ClientView : Window
+    public partial class MainView : Window
     {
-        public ClientView()
+        public MainView()
         {
             InitializeComponent();
         }

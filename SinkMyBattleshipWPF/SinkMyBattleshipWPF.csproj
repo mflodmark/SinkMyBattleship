@@ -67,16 +67,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Integration\TextBoxBehaviour.cs" />
     <Compile Include="Models\Logger.cs" />
     <Compile Include="Models\Starter.cs" />
-    <Compile Include="ViewModels\ClientViewModel.cs" />
-    <Compile Include="ViewModels\ServerViewModel.cs" />
+    <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
-    <Compile Include="Views\ClientView.xaml.cs">
-      <DependentUpon>ClientView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ServerView.xaml.cs">
-      <DependentUpon>ServerView.xaml</DependentUpon>
+    <Compile Include="Views\MainView.xaml.cs">
+      <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
@@ -86,11 +83,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Bootstrapper.cs" />
-    <Page Include="Views\ClientView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ServerView.xaml">
+    <Page Include="Views\MainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

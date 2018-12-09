@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SinkMyBattleshipWPF.ViewModels
 {
@@ -33,25 +34,10 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public void PlayGame()
         {
-            if(string.IsNullOrEmpty(Address))
-            {
-                StartServer();
-            } else
-            {
-                StartClient();
-            }
-        }
-
-        private void StartServer()
-        {
             var manager = new WindowManager();
-            manager.ShowDialog(new ServerViewModel(Port), null);
-        }
-
-        private void StartClient()
-        {
-            var manager = new WindowManager();
-            manager.ShowDialog(new ClientViewModel(Address, Port), null);
+            manager.ShowWindow(new MainViewModel(Address, Port), null);
+            Application.Current.Windows[0].Close();
+            
         }
     }
 }
