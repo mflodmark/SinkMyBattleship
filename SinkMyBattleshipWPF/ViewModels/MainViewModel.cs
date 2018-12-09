@@ -99,7 +99,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                 listener.Start();
                 Logger.AddToLog($"Server: Starts listening on port: {port}");
             }
-            catch (SocketException ex)
+            catch (SocketException)
             {
                 Logger.AddToLog("Misslyckades att öppna socket. Troligtvis upptagen.");
                 Environment.Exit(1);

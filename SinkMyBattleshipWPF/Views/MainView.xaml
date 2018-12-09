@@ -37,9 +37,18 @@
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="60"/>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="30"/>
@@ -53,6 +62,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
+            <Label Grid.Row="0" Grid.Column="0" Content="Target"></Label>
             <Label Grid.Row="0" Grid.Column="1" Content="A"></Label>
             <Label Grid.Row="0" Grid.Column="2" Content="B"></Label>
             <Label Grid.Row="0" Grid.Column="3" Content="C"></Label>
@@ -63,6 +73,18 @@
             <Label Grid.Row="0" Grid.Column="8" Content="H"></Label>
             <Label Grid.Row="0" Grid.Column="9" Content="I"></Label>
             <Label Grid.Row="0" Grid.Column="10" Content="J"></Label>
+            <Label Grid.Row="0" Grid.Column="11" Content="Ocean"></Label>
+            <Label Grid.Row="0" Grid.Column="12" Content="A"></Label>
+            <Label Grid.Row="0" Grid.Column="13" Content="B"></Label>
+            <Label Grid.Row="0" Grid.Column="14" Content="C"></Label>
+            <Label Grid.Row="0" Grid.Column="15" Content="D"></Label>
+            <Label Grid.Row="0" Grid.Column="16" Content="E"></Label>
+            <Label Grid.Row="0" Grid.Column="17" Content="F"></Label>
+            <Label Grid.Row="0" Grid.Column="18" Content="G"></Label>
+            <Label Grid.Row="0" Grid.Column="19" Content="H"></Label>
+            <Label Grid.Row="0" Grid.Column="20" Content="I"></Label>
+            <Label Grid.Row="0" Grid.Column="21" Content="J"></Label>
+
 
             <Label Grid.Row="1" Grid.Column="0" Content="1"></Label>
             <Label Grid.Row="2" Grid.Column="0" Content="2"></Label>
@@ -88,6 +110,7 @@
                 <TextBox src:TextBoxBehaviour.ScrollOnTextChanged="True" VerticalScrollBarVisibility="Auto" 
                          IsEnabled="False" Text="{Binding Logger.Log}"></TextBox>
             </ScrollViewer>
+            
         </Grid>
     </DockPanel>
 </Window>

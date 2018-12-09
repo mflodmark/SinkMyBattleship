@@ -49,6 +49,10 @@
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="30"/>
                 <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition Width="30"/>
             </Grid.ColumnDefinitions>
 
             <Label Grid.Row="0" Grid.Column="1" Content="A"></Label>
@@ -73,11 +77,6 @@
             <Label Grid.Row="9" Grid.Column="0" Content="9"></Label>
             <Label Grid.Row="10" Grid.Column="0" Content="10"></Label>
 
-            <Button Grid.Column="1" Grid.Row="1" Content="A1" Style="{StaticResource GridButton}" Background="DarkBlue"></Button>
-            <Button Grid.Column="2" Grid.Row="1" Content="B1" Style="{StaticResource GridButton}"></Button>
-            <Button Grid.Column="3" Grid.Row="1" Content="C1" Style="{StaticResource GridButton}"></Button>
-            <Button Grid.Column="4" Grid.Row="1" Content="D1" Style="{StaticResource GridButton}"></Button>
-
             <Label Grid.Column="1" Grid.Row="12" Grid.ColumnSpan="2" Content="Namn:"></Label>
             <Label Grid.Column="1" Grid.Row="13" Grid.ColumnSpan="2" Content="Adress:"></Label>
             <Label Grid.Column="1" Grid.Row="14" Grid.ColumnSpan="2" Content="Port:"></Label>
@@ -87,6 +86,14 @@
             <TextBox x:Name="Port" Grid.Column="3" Grid.Row="14" Grid.ColumnSpan="5"></TextBox>
             
             <Button x:Name="PlayGame" Grid.Column="7" Grid.Row="15" Content="Play"></Button>
+
+            <Border Grid.ColumnSpan="{Binding CarrierColumnSpan}" Grid.Row="{Binding CarrierRow}" Grid.Column="{Binding CarrierColumn}" 
+                    Grid.RowSpan="{Binding CarrierRowSpan}" Background="DarkBlue"/>
+
+            <Label Grid.Row="2" Grid.Column="11" Grid.ColumnSpan="2" Content="Carrier:"></Label>
+            <TextBox x:Name="CarrierRow" Grid.Row="2" Grid.Column="13"></TextBox>
+            <TextBox x:Name="CarrierColumn" Grid.Row="2" Grid.Column="14"></TextBox>
+            <CheckBox x:Name="CarrierHorizontal" Grid.Row="2" Grid.Column="15"></CheckBox>
         </Grid>
     </DockPanel>
 
