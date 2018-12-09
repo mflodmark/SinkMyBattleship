@@ -24,7 +24,7 @@ namespace SinkMyBattleshipWPF.ViewModels
             }
             else
             {
-                StartClient(address, port);
+                Task.Run(() => StartClient(address, port));
             }
         }
 
@@ -35,6 +35,10 @@ namespace SinkMyBattleshipWPF.ViewModels
         static TcpListener listener;
 
         public string LastAction { get; set; }
+
+        public bool ClientReady { get; set; } // ha kvaR?
+
+        public bool ServerReady { get; set; } // ha kvar??
 
         public string Action
         {
@@ -76,9 +80,9 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                     while (true)
                     {
-                        var line = reader.ReadLine();
+                        var line = reader.ReadLineAsync();
                         writer.WriteLine($"Svar: {line}");
-                        if (line.Contains("fire")) break;
+                        if (line.ToString().Contains("fire")) break;
                     }
 
                 };
@@ -132,9 +136,15 @@ namespace SinkMyBattleshipWPF.ViewModels
                             if (command.Contains("fire"))
                             {
                                 Logger.AddToLog($"Klient: {command}");
-                                //writer.WriteLine($"Klient: {command}");
+                                writer.WriteLine($"Waiting for opponents action..");
                                 LastAction = "";
+                                ServerReady = true;
+                                ClientReady = false;
                                 break;
+                            }
+                            else if (!ClientReady)
+                            {
+                                // do nothing??
                             }
                             else
                             {
@@ -152,7 +162,10 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 {
                                     writer.WriteLine(LastAction + " LastAction");
                                     Logger.AddToLog(LastAction + " LastAction");
+                                    Logger.AddToLog("Waiting for opponents action..");
                                     LastAction = "";
+                                    ClientReady = true;
+                                    ServerReady = false;
                                     break;
                                 }
                                 else
