@@ -36,10 +36,6 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public string LastAction { get; set; }
 
-        public bool ClientReady { get; set; } // ha kvaR?
-
-        public bool ServerReady { get; set; } // ha kvar??
-
         public string Action
         {
             get => _action;
@@ -133,23 +129,20 @@ namespace SinkMyBattleshipWPF.ViewModels
                         {
                             command = reader.ReadLine();
 
-                            if (command.Contains("fire"))
+                            if (!string.IsNullOrEmpty(command))
                             {
-                                Logger.AddToLog($"Klient: {command}");
-                                writer.WriteLine($"Waiting for opponents action..");
-                                LastAction = "";
-                                ServerReady = true;
-                                ClientReady = false;
-                                break;
-                            }
-                            else if (!ClientReady)
-                            {
-                                // do nothing??
-                            }
-                            else
-                            {
-                                writer.WriteLine("501 Sequence error");
-                                //Logger.AddToLog("501 Sequence error");
+                                if (command.Contains("fire"))
+                                {
+                                    Logger.AddToLog($"Klient: {command}");
+                                    writer.WriteLine($"Waiting for opponents action..");
+                                    LastAction = "";
+                                    break;
+                                }
+                                else
+                                {
+                                    writer.WriteLine("501 Sequence error");
+                                }
+
                             }
                         }
 
@@ -164,8 +157,6 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     Logger.AddToLog(LastAction + " LastAction");
                                     Logger.AddToLog("Waiting for opponents action..");
                                     LastAction = "";
-                                    ClientReady = true;
-                                    ServerReady = false;
                                     break;
                                 }
                                 else
