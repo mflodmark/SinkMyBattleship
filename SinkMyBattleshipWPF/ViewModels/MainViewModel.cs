@@ -123,8 +123,10 @@ namespace SinkMyBattleshipWPF.ViewModels
                     Logger.AddToLog("210 BATTLESHIP/1.0");
                     var handshake = false;
                     var start = false;
+                    var clientPlayer = new Player(null, null, 0, null);
+                    var continuePlay = true;
 
-                    while (client.Connected)
+                    while (client.Connected && continuePlay)
                     {
                         var command = "";
 
@@ -139,6 +141,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 Logger.AddToLog(command);
                                 writer.WriteLine($"220 {player.Name}");
                                 Logger.AddToLog($"220 {player.Name}");
+                                clientPlayer.Name = command.Split(' ')[1];
                             }
                             else if (command.ToUpper() == "QUIT")
                             {
@@ -156,7 +159,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                         }
 
                         // start game
-                        if(!start && handshake)
+                        if (!start && handshake)
                         {
                             command = reader.ReadLine();
 
@@ -167,6 +170,21 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 start = true;
 
                                 // logic for who starts the game
+                                var random = new Random();
+                                var number = random.Next(0, 2) + 1;
+                                player.Turn = number;
+                                clientPlayer.Turn = number == 1 ? 2 : 1;
+
+                                if (player.Turn == 1)
+                                {
+                                    writer.WriteLine($"222 Host Starts");
+                                    Logger.AddToLog($"222 Host Starts");
+                                }
+                                else
+                                {
+                                    writer.WriteLine($"221 Client Starts");
+                                    Logger.AddToLog($"221 Client Starts");
+                                }
                             }
                             else if (command.ToUpper() == "QUIT")
                             {
@@ -182,64 +200,72 @@ namespace SinkMyBattleshipWPF.ViewModels
                             }
                         }
 
-
-                        // wait for correct action from client
-                        while (handshake)
+                        // Loop host vs client
+                        for (int i = 1; i < 3; i++)
                         {
-                            command = reader.ReadLine();
-
-                            if (!string.IsNullOrEmpty(command))
+                            // wait for correct action from client
+                            while (start && clientPlayer.Turn == 1 && continuePlay)
                             {
-                                if (command.Contains("fire "))
+                                command = reader.ReadLine();
+
+                                if (!string.IsNullOrEmpty(command))
                                 {
-                                    Logger.AddToLog($"Klient: {command}");
-                                    writer.WriteLine($"Waiting for opponents action..");
-                                    LastAction = "";
-                                    break;
+                                    if (command.Contains("fire "))
+                                    {
+                                        Logger.AddToLog($"Klient: {command}");
+                                        writer.WriteLine($"Waiting for opponents action..");
+                                        LastAction = "";
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        writer.WriteLine("501 Sequence error");
+                                    }
+
                                 }
-                                else
+
+                                if (command.ToUpper() == "QUIT")
                                 {
-                                    writer.WriteLine("501 Sequence error");
+                                    continuePlay = false;
+                                    break; // TODO: do some logging
                                 }
+                            }
+
+                            // Wait for correct action from server
+                            while (start && player.Turn == 2 && continuePlay)
+                            {
+                                if (!string.IsNullOrEmpty(LastAction))
+                                {
+                                    if (LastAction.Contains("fire"))
+                                    {
+                                        writer.WriteLine(LastAction + " LastAction");
+                                        Logger.AddToLog(LastAction + " LastAction");
+                                        Logger.AddToLog("Waiting for opponents action..");
+                                        LastAction = "";
+                                        break;
+                                    }
+                                    else if (LastAction.ToUpper() == "QUIT")
+                                    {
+                                        continuePlay = false;
+                                        break;
+                                    }
+
+                                    else
+                                    {
+                                        //writer.WriteLine("501 Sequence error");
+                                        Logger.AddToLog("501 Sequence error");
+                                        LastAction = "";
+                                    }
+
+                                }
+
+
 
                             }
 
-                            if (command.ToUpper() == "QUIT")
-                            {
-                                break; // TODO: do some logging
-                            }
                         }
 
-                        // Wait for correct action from server
-                        while (handshake)
-                        {
-                            if (!string.IsNullOrEmpty(LastAction))
-                            {
-                                if (LastAction.Contains("fire"))
-                                {
-                                    writer.WriteLine(LastAction + " LastAction");
-                                    Logger.AddToLog(LastAction + " LastAction");
-                                    Logger.AddToLog("Waiting for opponents action..");
-                                    LastAction = "";
-                                    break;
-                                }
-                                else if (LastAction.ToUpper() == "QUIT")
-                                {
-                                    break;
-                                }
 
-                                else
-                                {
-                                    //writer.WriteLine("501 Sequence error");
-                                    Logger.AddToLog("501 Sequence error");
-                                    LastAction = "";
-                                }
-
-                            }
-
-
-
-                        }
 
                     }
 

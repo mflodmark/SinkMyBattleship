@@ -16,6 +16,8 @@ namespace SinkMyBattleshipWPF.Models
 
         public List<Boat> Boats { get; set; } = new List<Boat>();
 
+        public int Turn { get; set; }
+
         public Player(string name, string address, int port, List<Boat> boats)
         {
             Name = name;
