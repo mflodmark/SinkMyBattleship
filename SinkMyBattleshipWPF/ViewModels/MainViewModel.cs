@@ -60,10 +60,10 @@ namespace SinkMyBattleshipWPF.ViewModels
             using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
             {
                 Logger.AddToLog($"Ansluten till {client.Client.RemoteEndPoint}");
+                writer.WriteLine($"HELO {player.Name}");
+
                 while (client.Connected)
                 {
-                    Logger.AddToLog("Ange text att skicka: (Skriv QUIT för att avsluta)");
-
                     if (Action == "QUIT") break;
 
                     // Skicka text
@@ -121,31 +121,67 @@ namespace SinkMyBattleshipWPF.ViewModels
                     Logger.AddToLog($"Klient har anslutit sig {client.Client.RemoteEndPoint}!");
                     writer.WriteLine("210 BATTLESHIP/1.0");
                     Logger.AddToLog("210 BATTLESHIP/1.0");
+                    var handshake = false;
+                    var start = false;
 
                     while (client.Connected)
                     {
                         var command = "";
-                        var clientName = "";
-                        var handshake = false;
 
-                        if (string.IsNullOrEmpty(clientName))
+                        // handskake
+                        if (!handshake)
                         {
-                            handshake = false;
-                        }
-                        {
-                            handshake = true;
+                            command = reader.ReadLine();
+
+                            if (command.StartsWith("helo ", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                handshake = true;
+                                Logger.AddToLog(command);
+                                writer.WriteLine($"220 {player.Name}");
+                                Logger.AddToLog($"220 {player.Name}");
+                            }
+                            else if (command.ToUpper() == "QUIT")
+                            {
+                                break; // TODO: do some logging
+                            }
+                            else if (true)
+                            {
+                                // check for 501 sequence error
+                            }
+                            else
+                            {
+                                // check for 500 syntax error
+                            }
+
                         }
 
-                        if (!handshake )
+                        // start game
+                        if(!start && handshake)
                         {
-                            clientName = reader.ReadLine();
+                            command = reader.ReadLine();
+
+                            if (command.ToUpper() == "START")
+                            {
+                                writer.WriteLine(command);
+                                Logger.AddToLog(command);
+                                start = true;
+
+                                // logic for who starts the game
+                            }
+                            else if (command.ToUpper() == "QUIT")
+                            {
+                                break; // TODO: do some logging
+                            }
+                            else if (true)
+                            {
+                                // check for 501 sequence error
+                            }
+                            else
+                            {
+                                // check for 500 syntax error
+                            }
                         }
 
-                        if (clientName.StartsWith("helo ", StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            handshake = true;
-                            writer.WriteLine($"HELO {player.Name}");
-                        }
 
                         // wait for correct action from client
                         while (handshake)
@@ -154,7 +190,7 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                             if (!string.IsNullOrEmpty(command))
                             {
-                                if (command.Contains("fire"))
+                                if (command.Contains("fire "))
                                 {
                                     Logger.AddToLog($"Klient: {command}");
                                     writer.WriteLine($"Waiting for opponents action..");
@@ -166,6 +202,11 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     writer.WriteLine("501 Sequence error");
                                 }
 
+                            }
+
+                            if (command.ToUpper() == "QUIT")
+                            {
+                                break; // TODO: do some logging
                             }
                         }
 
@@ -182,13 +223,21 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     LastAction = "";
                                     break;
                                 }
+                                else if (LastAction.ToUpper() == "QUIT")
+                                {
+                                    break;
+                                }
+
                                 else
                                 {
                                     //writer.WriteLine("501 Sequence error");
                                     Logger.AddToLog("501 Sequence error");
                                     LastAction = "";
                                 }
+
                             }
+
+
 
                         }
 

@@ -112,7 +112,7 @@ namespace SinkMyBattleshipWPF.ViewModels
         public void PlayGame()
         {
             var manager = new WindowManager();
-            manager.ShowWindow(new MainViewModel(new Player(Name, Address, Port)), null);
+            manager.ShowWindow(new MainViewModel(new Player(Name, Address, Port, Boats)), null);
             Application.Current.Windows[0].Close();
 
         }

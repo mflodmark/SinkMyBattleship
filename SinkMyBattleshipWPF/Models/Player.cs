@@ -14,11 +14,14 @@ namespace SinkMyBattleshipWPF.Models
 
         public int Port { get; set; }
 
-        public Player(string name, string address, int port)
+        public List<Boat> Boats { get; set; } = new List<Boat>();
+
+        public Player(string name, string address, int port, List<Boat> boats)
         {
             Name = name;
             Address = address;
             Port = port;
+            Boats = boats;
         }
     }
 }
