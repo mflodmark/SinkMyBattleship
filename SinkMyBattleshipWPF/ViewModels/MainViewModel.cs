@@ -64,22 +64,25 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                 while (client.Connected)
                 {
-                    if (Action == "QUIT") break;
+                    if (LastAction == "QUIT") break;
+
+                    while (true)
+                    {
+                        var line = reader.ReadLine();
+
+                        writer.WriteLine($"START");
+                        if (line.ToString().Contains("fire")) break;
+                    }
 
                     // Skicka text
                     while (true)
                     {
                         //var text = Console.ReadLine(); // LÄS FRÅN TEXTRUTA
-                        writer.WriteLine(Action);
+                        writer.WriteLine(LastAction);
                         if (LastAction.Contains("fire")) break;
                     }
 
-                    while (true)
-                    {
-                        var line = reader.ReadLineAsync();
-                        writer.WriteLine($"Svar: {line}");
-                        if (line.ToString().Contains("fire")) break;
-                    }
+
 
                 };
 
@@ -121,6 +124,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                     Logger.AddToLog($"Klient har anslutit sig {client.Client.RemoteEndPoint}!");
                     writer.WriteLine("210 BATTLESHIP/1.0");
                     Logger.AddToLog("210 BATTLESHIP/1.0");
+
                     var handshake = false;
                     var start = false;
                     var clientPlayer = new Player(null, null, 0, null);
@@ -165,7 +169,6 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                             if (command.ToUpper() == "START")
                             {
-                                writer.WriteLine(command);
                                 Logger.AddToLog(command);
                                 start = true;
 
@@ -204,7 +207,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                         for (int i = 1; i < 3; i++)
                         {
                             // wait for correct action from client
-                            while (start && clientPlayer.Turn == 1 && continuePlay)
+                            while (start && clientPlayer.Turn == i && continuePlay)
                             {
                                 command = reader.ReadLine();
 
@@ -238,7 +241,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                             }
 
                             // Wait for correct action from server
-                            while (start && player.Turn == 2 && continuePlay)
+                            while (start && player.Turn == i && continuePlay)
                             {
                                 if (LastAction.ToUpper() == "QUIT")
                                 {
@@ -290,17 +293,18 @@ namespace SinkMyBattleshipWPF.ViewModels
             LastAction = Action;
         }
 
-        private bool CommandSyntaxCheck(string input)
+        public bool CommandSyntaxCheck(string input)
         {
-            input = input.Split(' ')[0].ToUpper();
+            var input1 = input.Split(' ')[0].ToUpper();
+            var input2 = input.Split(' ')[1].ToUpper();
             var commands = new List<string>() { "HELO", "START", "FIRE", "HELP" };
 
-            if (!commands.Contains(input))
+            if (!commands.Contains(input1))
                 return false;
 
-            if (input == "FIRE")
+            if (input1 == "FIRE")
             {
-                return true && FireSyntaxCheck(input);
+                return FireSyntaxCheck(input2);
             }
 
             return true;
@@ -318,10 +322,8 @@ namespace SinkMyBattleshipWPF.ViewModels
             }
         }
 
-        private bool FireSyntaxCheck(string input)
+        public bool FireSyntaxCheck(string input)
         {
-            input = input.Split(' ')[1].ToUpper();
-
             if (input.Length < 1 || input.Length > 3)
                 return false;
             var character = input[0];
