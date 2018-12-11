@@ -96,8 +96,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Integration\TextBoxBehaviour.cs" />
+    <Compile Include="Models\Boat.cs" />
     <Compile Include="Models\Logger.cs" />
-    <Compile Include="Models\Starter.cs" />
+    <Compile Include="Models\Player.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="Views\MainView.xaml.cs">

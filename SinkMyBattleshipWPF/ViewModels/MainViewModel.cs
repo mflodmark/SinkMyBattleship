@@ -15,16 +15,16 @@ namespace SinkMyBattleshipWPF.ViewModels
     {
         private string _action;
 
-        public MainViewModel(string address, int port)
+        public MainViewModel(Player player)
         {
-            if (string.IsNullOrEmpty(address))
+            if (string.IsNullOrEmpty(player.Address))
 
             {
-                Task.Run(() => StartServer(port));
+                Task.Run(() => StartServer(player));
             }
             else
             {
-                Task.Run(() => StartClient(address, port));
+                Task.Run(() => StartClient(player));
             }
         }
 
@@ -52,9 +52,9 @@ namespace SinkMyBattleshipWPF.ViewModels
         }
 
 
-        private void StartClient(string address, int port)
+        private void StartClient(Player player)
         {
-            using (var client = new TcpClient(address, port))
+            using (var client = new TcpClient(player.Address, player.Port))
             using (var networkStream = client.GetStream())
             using (var reader = new StreamReader(networkStream, Encoding.UTF8))
             using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
@@ -93,7 +93,7 @@ namespace SinkMyBattleshipWPF.ViewModels
             {
                 listener = new TcpListener(IPAddress.Any, port);
                 listener.Start();
-                Logger.AddToLog($"Server: Starts listening on port: {port}");
+                Logger.AddToLog($"Starts listening on port: {port}");
             }
             catch (SocketException)
             {
@@ -102,15 +102,15 @@ namespace SinkMyBattleshipWPF.ViewModels
             }
         }
 
-        private async Task StartServer(int port)
+        private async Task StartServer(Player player)
         {
-            Logger.AddToLog("Server: Välkommen till servern");
+            Logger.AddToLog("Välkommen till servern");
 
-            StartListen(port);
+            StartListen(player.Port);
 
             while (true)
             {
-                Logger.AddToLog("Server: Väntar på att någon ska ansluta sig...");
+                Logger.AddToLog("Väntar på att någon ska ansluta sig...");
 
 
                 using (var client = await listener.AcceptTcpClientAsync())
@@ -118,14 +118,37 @@ namespace SinkMyBattleshipWPF.ViewModels
                 using (var reader = new StreamReader(networkStream, Encoding.UTF8))
                 using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
                 {
-                    Logger.AddToLog($"Server: Klient har anslutit sig {client.Client.RemoteEndPoint}!");
+                    Logger.AddToLog($"Klient har anslutit sig {client.Client.RemoteEndPoint}!");
+                    writer.WriteLine("210 BATTLESHIP/1.0");
+                    Logger.AddToLog("210 BATTLESHIP/1.0");
 
                     while (client.Connected)
                     {
                         var command = "";
+                        var clientName = "";
+                        var handshake = false;
+
+                        if (string.IsNullOrEmpty(clientName))
+                        {
+                            handshake = false;
+                        }
+                        {
+                            handshake = true;
+                        }
+
+                        if (!handshake )
+                        {
+                            clientName = reader.ReadLine();
+                        }
+
+                        if (clientName.StartsWith("helo ", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            handshake = true;
+                            writer.WriteLine($"HELO {player.Name}");
+                        }
 
                         // wait for correct action from client
-                        while (true)
+                        while (handshake)
                         {
                             command = reader.ReadLine();
 
@@ -147,7 +170,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                         }
 
                         // Wait for correct action from server
-                        while (true)
+                        while (handshake)
                         {
                             if (!string.IsNullOrEmpty(LastAction))
                             {

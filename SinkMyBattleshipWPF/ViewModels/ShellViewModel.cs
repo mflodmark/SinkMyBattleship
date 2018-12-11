@@ -22,6 +22,13 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public ShellViewModel()
         {
+
+            Boats.Add(new Boat("Carrier", new List<string>() {"A1","A2","A3","A4","A5" }));
+            Boats.Add(new Boat("Battleship", new List<string>() {"B1","B2","B3","B4"}));
+            Boats.Add(new Boat("Destroyer", new List<string>() {"C1","C2","C3" }));
+            Boats.Add(new Boat("Submarine", new List<string>() {"D1","D2","D3"}));
+            Boats.Add(new Boat("Patrol Boat", new List<string>() {"E1","E2"}));
+
             CarrierRow = 1;
             CarrierColumn = 1;
             CarrierHorizontal = true;
@@ -30,6 +37,10 @@ namespace SinkMyBattleshipWPF.ViewModels
         public string Name { get; set; }
         public string Address { get; set; }
         public int Port { get; set; }
+
+        public Player Player { get; set; }
+
+        public List<Boat> Boats { get; set; } = new List<Boat>();
 
         public int CarrierRow
         {
@@ -101,9 +112,14 @@ namespace SinkMyBattleshipWPF.ViewModels
         public void PlayGame()
         {
             var manager = new WindowManager();
-            manager.ShowWindow(new MainViewModel(Address, Port), null);
+            manager.ShowWindow(new MainViewModel(new Player(Name, Address, Port)), null);
             Application.Current.Windows[0].Close();
 
+        }
+
+        private int GetRow()
+        {
+            return 1;
         }
     }
 }
