@@ -208,53 +208,62 @@ namespace SinkMyBattleshipWPF.ViewModels
                             {
                                 command = reader.ReadLine();
 
-                                if (!string.IsNullOrEmpty(command))
-                                {
-                                    if (command.Contains("fire "))
-                                    {
-                                        Logger.AddToLog($"Klient: {command}");
-                                        writer.WriteLine($"Waiting for opponents action..");
-                                        LastAction = "";
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        writer.WriteLine("501 Sequence error");
-                                    }
-
-                                }
-
                                 if (command.ToUpper() == "QUIT")
                                 {
                                     continuePlay = false;
                                     break; // TODO: do some logging
                                 }
+
+                                if (!CommandSyntaxCheck(command))
+                                {
+                                    writer.WriteLine("501 Syntax Error");
+                                }
+                                else if (!CommandSequenceCheck(command, handshake, start))
+                                {
+                                    writer.WriteLine("500 Sequence Error");
+                                }
+                                else if (!string.IsNullOrEmpty(command))
+                                {
+                                    if (command.ToLower().StartsWith("fire "))
+                                    {
+                                        // Game logic
+                                        Logger.AddToLog($"Klient: {command}");
+                                        writer.WriteLine($"Waiting for opponents action..");
+                                        LastAction = "";
+                                        break;
+                                    }
+
+                                }
+
                             }
 
                             // Wait for correct action from server
                             while (start && player.Turn == 2 && continuePlay)
                             {
-                                if (!string.IsNullOrEmpty(LastAction))
+                                if (LastAction.ToUpper() == "QUIT")
                                 {
-                                    if (LastAction.Contains("fire"))
+                                    continuePlay = false;
+                                    break; // TODO: do some logging
+                                }
+
+
+                                if (!CommandSyntaxCheck(LastAction))
+                                {
+                                    Logger.AddToLog("501 Syntax Error");
+                                }
+                                else if (!CommandSequenceCheck(LastAction, handshake, start))
+                                {
+                                    Logger.AddToLog("500 Sequence Error");
+                                }
+                                else if (!string.IsNullOrEmpty(LastAction))
+                                {
+                                    if (LastAction.ToLower().StartsWith("fire "))
                                     {
-                                        writer.WriteLine(LastAction + " LastAction");
-                                        Logger.AddToLog(LastAction + " LastAction");
+                                        writer.WriteLine(LastAction);
+                                        Logger.AddToLog(LastAction);
                                         Logger.AddToLog("Waiting for opponents action..");
                                         LastAction = "";
                                         break;
-                                    }
-                                    else if (LastAction.ToUpper() == "QUIT")
-                                    {
-                                        continuePlay = false;
-                                        break;
-                                    }
-
-                                    else
-                                    {
-                                        //writer.WriteLine("501 Sequence error");
-                                        Logger.AddToLog("501 Sequence error");
-                                        LastAction = "";
                                     }
 
                                 }
@@ -279,6 +288,67 @@ namespace SinkMyBattleshipWPF.ViewModels
         public void SendAction()
         {
             LastAction = Action;
+        }
+
+        private bool CommandSyntaxCheck(string input)
+        {
+            input = input.Split(' ')[0].ToUpper();
+            var commands = new List<string>() { "HELO", "START", "FIRE", "HELP" };
+
+            if (!commands.Contains(input))
+                return false;
+
+            if (input == "FIRE")
+            {
+                return true && FireSyntaxCheck(input);
+            }
+
+            return true;
+        }
+
+        private bool CommandSequenceCheck(string input, bool handshake, bool start)
+        {
+            if (input.ToLower().Split(' ')[0] == "fire" && handshake && start)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool FireSyntaxCheck(string input)
+        {
+            input = input.Split(' ')[1].ToUpper();
+
+            if (input.Length < 1 || input.Length > 3)
+                return false;
+            var character = input[0];
+            if (character < 'A' || character > 'J')
+            {
+                return false;
+            }
+            int num;
+            int num2;
+            var isNum = int.TryParse(input[1].ToString(), out num);
+            if (!isNum)
+            {
+                return false;
+            }
+            if (input.Length == 3)
+            {
+                isNum = int.TryParse(input[2].ToString(), out num2);
+                if (!isNum)
+                    return false;
+                var textNum = num.ToString() + num2.ToString();
+                num = int.Parse(textNum);
+            }
+            if (num < 1 || num > 10)
+            {
+                return false;
+            }
+            return true;
         }
 
     }
