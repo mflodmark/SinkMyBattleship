@@ -2,6 +2,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SinkMyBattleshipWPF.Models;
 using SinkMyBattleshipWPF.ViewModels;
+using SinkMyBattleshipWPF.Extensions;
+
 
 namespace UnitTests
 {
@@ -62,6 +64,19 @@ namespace UnitTests
 
             //assert
             Assert.IsFalse(test);
+        }
+
+        [TestMethod]
+        public void EnumDescriptionIsTrue()
+        {
+            //arrange
+            var enumClass = AnswerCodes.Sequence_Error;
+
+            //act
+            var enumString = enumClass.GetDescription();
+
+            //assert
+            Assert.AreEqual("501 Sequence Error", enumString);
         }
     }
 }

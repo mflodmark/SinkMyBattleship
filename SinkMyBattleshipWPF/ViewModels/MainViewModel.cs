@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using SinkMyBattleshipWPF.Extensions;
 
 namespace SinkMyBattleshipWPF.ViewModels
 {
@@ -151,13 +152,13 @@ namespace SinkMyBattleshipWPF.ViewModels
                             {
                                 break; // TODO: do some logging
                             }
-                            else if (true)
+                            else if (!CommandSyntaxCheck(command))
                             {
-                                // check for 501 sequence error
+                                Logger.AddToLog("500 Syntax Error");
                             }
-                            else
+                            else if (!CommandSequenceCheck(command, handshake, true))
                             {
-                                // check for 500 syntax error
+                                Logger.AddToLog("501 Sequence Error");
                             }
 
                         }
@@ -193,13 +194,13 @@ namespace SinkMyBattleshipWPF.ViewModels
                             {
                                 break; // TODO: do some logging
                             }
-                            else if (true)
+                            else if (!CommandSyntaxCheck(command))
                             {
-                                // check for 501 sequence error
+                                Logger.AddToLog("500 Syntax Error");
                             }
-                            else
+                            else if (!CommandSequenceCheck(command, handshake, start))
                             {
-                                // check for 500 syntax error
+                                Logger.AddToLog("501 Sequence Error");
                             }
                         }
 
@@ -219,11 +220,11 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                                 if (!CommandSyntaxCheck(command))
                                 {
-                                    writer.WriteLine("501 Syntax Error");
+                                    writer.WriteLine("500 Syntax Error");
                                 }
                                 else if (!CommandSequenceCheck(command, handshake, start))
                                 {
-                                    writer.WriteLine("500 Sequence Error");
+                                    writer.WriteLine("501 Sequence Error");
                                 }
                                 else if (!string.IsNullOrEmpty(command))
                                 {
@@ -252,11 +253,11 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                                 if (!CommandSyntaxCheck(LastAction))
                                 {
-                                    Logger.AddToLog("501 Syntax Error");
+                                    Logger.AddToLog("500 Syntax Error");
                                 }
                                 else if (!CommandSequenceCheck(LastAction, handshake, start))
                                 {
-                                    Logger.AddToLog("500 Sequence Error");
+                                    Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
                                 }
                                 else if (!string.IsNullOrEmpty(LastAction))
                                 {
@@ -353,5 +354,64 @@ namespace SinkMyBattleshipWPF.ViewModels
             return true;
         }
 
+        
+
+    }
+
+    public enum AnswerCodes
+    {
+        [Description("210 BATTLESHIP/1.0")]
+        Battleship = 210,
+
+        [Description("221 Client Starts")]
+        ClientStarts = 221,
+
+        [Description("222 Host Starts")]
+        HostStarts = 222,
+
+        [Description("230 Miss")]
+        Miss = 230,
+
+        [Description("241 You hit my Carrier")]
+        YouHitMyCarrier = 241,
+
+        [Description("242 You hit my Battleship")]
+        YouHitMyBattleship = 242,
+
+        [Description("243 You hit my Destroyer")]
+        YouHitMyDestroyer = 243,
+
+        [Description("244 You hit my Submarine")]
+        YouHitMySubmarine = 244,
+
+        [Description("245 You hit my Patrol Boat")]
+        YouHitMyPatrolBpat = 245,
+
+        [Description("251 You sunk my Carrier")]
+        YouSunkMyCarrier = 251,
+
+        [Description("252 You sunk my Battleship")]
+        YouSunkMyBattleship = 252,
+
+        [Description("253 You sunk my Destroyer")]
+        YouSunkMyDestroyer = 253,
+
+        [Description("254 You sunk my Submarine")]
+        YouSunkMySubmarine = 254,
+
+        [Description("255 You sunk my Patrol Boat")]
+        YouSunkMyPatrolBoat = 255,
+
+        [Description("260 You win")]
+        YouWin = 260,
+
+        [Description("270 Connection closed")]
+        ConnectionClosed = 270,
+
+        [Description("500 Syntax Error")]
+        Syntax_Error = 500,
+
+        [Description("501 Sequence Error")]
+        Sequence_Error = 501
     }
 }

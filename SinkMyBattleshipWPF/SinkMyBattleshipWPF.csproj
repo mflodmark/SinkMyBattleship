@@ -95,6 +95,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Integration\TextBoxBehaviour.cs" />
     <Compile Include="Models\Boat.cs" />
     <Compile Include="Models\Logger.cs" />
