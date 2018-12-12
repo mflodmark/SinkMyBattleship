@@ -55,34 +55,133 @@ namespace SinkMyBattleshipWPF.ViewModels
         }
 
 
-        private void StartClient(Player player)
+        private async Task StartClient(Player player)
         {
             using (var client = new TcpClient(player.Address, player.Port))
             using (var networkStream = client.GetStream())
             using (var reader = new StreamReader(networkStream, Encoding.UTF8))
             using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
             {
+                var command = "";
+                LastAction = "";
+                var playerServer = new Player(null, null, 0, null);
+                var continuePlay = true;
+
                 Logger.AddToLog($"Ansluten till {client.Client.RemoteEndPoint}");
-                writer.WriteLine($"HELO {player.Name}");
-
-                while (client.Connected)
+                
+                // Check battleship
+                command = reader.ReadLine();
+                if (!command.StartsWith("210"))
                 {
-                    if (LastAction == "QUIT") break;
+                    continuePlay = false;
+                }
+                else
+                {
+                    Logger.AddToLog(command);
+                }
 
-                    while (true)
+                writer.WriteLine($"HELO {player.Name}");
+                Logger.AddToLog($"HELO {player.Name}");
+
+                // Check handshake
+                command = reader.ReadLine();
+                if (!command.StartsWith("220"))
+                {
+                    continuePlay = false;
+                }
+                else
+                {
+                    Logger.AddToLog(command);
+                }
+
+                //Check which player starts
+                writer.WriteLine("START");
+                Logger.AddToLog("START");
+
+                command = reader.ReadLine();
+                if(command.StartsWith("221"))
+                {
+                    player.Turn = 1;
+                    playerServer.Turn = 2;
+                }
+                else
+                {
+                    player.Turn = 2;
+                    playerServer.Turn = 1;
+                }
+                Logger.AddToLog(command);
+
+                while (client.Connected && continuePlay)
+                {
+                    for (int i = 1; i < 3; i++)
                     {
-                        var line = reader.ReadLine();
+                        // Server command - game logic
+                        while (playerServer.Turn == i && continuePlay)
+                        {
+                            command = await reader.ReadLineAsync();
+                            Logger.AddToLog($"Server: {command}");
 
-                        writer.WriteLine($"START");
-                        if (line.ToString().Contains("fire")) break;
-                    }
+                            if (command.ToLower().StartsWith("fire "))
+                            {
+                                // Game logic
+                                //writer.WriteLine(AnswerCodes.YouHitMyBattleship.GetDescription());
+                                LastAction = "";
+                                break;
+                            }
+                            else if (command.ToLower().StartsWith("270"))
+                            {
+                                // Connection lost
+                            }
+                            else if (command.ToLower().StartsWith("260"))
+                            {
+                                // You win
+                            }
 
-                    // Skicka text
-                    while (true)
-                    {
-                        //var text = Console.ReadLine(); // LÄS FRÅN TEXTRUTA
-                        writer.WriteLine(LastAction);
-                        if (LastAction.Contains("fire")) break;
+
+                            
+
+                        }
+
+
+                        // Client command
+                        while (player.Turn == i && continuePlay)
+                        {
+                            if (LastAction.ToUpper() == "QUIT")
+                            {
+                                continuePlay = false;
+                                break; // TODO: do some logging
+                            }
+
+                            if (!string.IsNullOrEmpty(LastAction))
+                            {
+                                if (LastAction.ToLower().StartsWith("fire "))
+                                {
+                                    writer.WriteLine(LastAction);
+                                    Logger.AddToLog(LastAction);
+
+                                    var response = reader.ReadLine();
+                                    if (response.StartsWith("5"))
+                                    {
+                                        Logger.AddToLog(response);
+                                        LastAction = "";
+                                        continue;
+                                    }
+
+                                    LastAction = "";
+                                    break;
+                                }
+
+                                LastAction = "";
+
+                            }
+                            else
+                            {
+                                Thread.Sleep(500);
+                            }
+                        }
+
+                        //Logger.AddToLog("Waiting for opponents action..");
+
                     }
 
 
@@ -234,7 +333,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     {
                                         // Game logic
                                         Logger.AddToLog($"Klient: {command}");
-                                        writer.WriteLine($"Waiting for opponents action..");
+                                        //writer.WriteLine($"Waiting for opponents action..");
                                         LastAction = "";
                                         break;
                                     }
