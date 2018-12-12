@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SinkMyBattleshipWPF.Models;
 using SinkMyBattleshipWPF.ViewModels;
 using SinkMyBattleshipWPF.Extensions;
-
+using SinkMyBattleshipWPF.Utils;
 
 namespace UnitTests
 {
@@ -57,6 +57,20 @@ namespace UnitTests
         {
             //arrange
             var input = "FIRE M9";
+            var main = new MainViewModel(new Player(null, "", 0, null));
+
+            //act
+            var test = main.CommandSyntaxCheck(input);
+
+            //assert
+            Assert.IsFalse(test);
+        }
+
+        [TestMethod]
+        public void CommandSyntaxCheckIsFalse2()
+        {
+            //arrange
+            var input = "verer";
             var main = new MainViewModel(new Player(null, "", 0, null));
 
             //act

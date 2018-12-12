@@ -9,6 +9,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using SinkMyBattleshipWPF.Extensions;
+using SinkMyBattleshipWPF.Utils;
+using System.Threading;
 
 namespace SinkMyBattleshipWPF.ViewModels
 {
@@ -123,8 +125,8 @@ namespace SinkMyBattleshipWPF.ViewModels
                 using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
                 {
                     Logger.AddToLog($"Klient har anslutit sig {client.Client.RemoteEndPoint}!");
-                    writer.WriteLine("210 BATTLESHIP/1.0");
-                    Logger.AddToLog("210 BATTLESHIP/1.0");
+                    writer.WriteLine(AnswerCodes.Battleship.GetDescription());
+                    Logger.AddToLog(AnswerCodes.Battleship.GetDescription());
 
                     var handshake = false;
                     var start = false;
@@ -154,11 +156,11 @@ namespace SinkMyBattleshipWPF.ViewModels
                             }
                             else if (!CommandSyntaxCheck(command))
                             {
-                                Logger.AddToLog("500 Syntax Error");
+                                Logger.AddToLog(AnswerCodes.Syntax_Error.GetDescription());
                             }
                             else if (!CommandSequenceCheck(command, handshake, true))
                             {
-                                Logger.AddToLog("501 Sequence Error");
+                                Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
                             }
 
                         }
@@ -181,13 +183,13 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                                 if (player.Turn == 1)
                                 {
-                                    writer.WriteLine($"222 Host Starts");
-                                    Logger.AddToLog($"222 Host Starts");
+                                    writer.WriteLine(AnswerCodes.HostStarts.GetDescription());
+                                    Logger.AddToLog(AnswerCodes.HostStarts.GetDescription());
                                 }
                                 else
                                 {
-                                    writer.WriteLine($"221 Client Starts");
-                                    Logger.AddToLog($"221 Client Starts");
+                                    writer.WriteLine(AnswerCodes.ClientStarts.GetDescription());
+                                    Logger.AddToLog(AnswerCodes.ClientStarts.GetDescription());
                                 }
                             }
                             else if (command.ToUpper() == "QUIT")
@@ -196,11 +198,11 @@ namespace SinkMyBattleshipWPF.ViewModels
                             }
                             else if (!CommandSyntaxCheck(command))
                             {
-                                Logger.AddToLog("500 Syntax Error");
+                                Logger.AddToLog(AnswerCodes.Syntax_Error.GetDescription());
                             }
                             else if (!CommandSequenceCheck(command, handshake, start))
                             {
-                                Logger.AddToLog("501 Sequence Error");
+                                Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
                             }
                         }
 
@@ -220,11 +222,11 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                                 if (!CommandSyntaxCheck(command))
                                 {
-                                    writer.WriteLine("500 Syntax Error");
+                                    writer.WriteLine(AnswerCodes.Syntax_Error.GetDescription());
                                 }
                                 else if (!CommandSequenceCheck(command, handshake, start))
                                 {
-                                    writer.WriteLine("501 Sequence Error");
+                                    writer.WriteLine(AnswerCodes.Sequence_Error.GetDescription());
                                 }
                                 else if (!string.IsNullOrEmpty(command))
                                 {
@@ -250,16 +252,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     break; // TODO: do some logging
                                 }
 
-
-                                if (!CommandSyntaxCheck(LastAction))
-                                {
-                                    Logger.AddToLog("500 Syntax Error");
-                                }
-                                else if (!CommandSequenceCheck(LastAction, handshake, start))
-                                {
-                                    Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
-                                }
-                                else if (!string.IsNullOrEmpty(LastAction))
+                                if (!string.IsNullOrEmpty(LastAction))
                                 {
                                     if (LastAction.ToLower().StartsWith("fire "))
                                     {
@@ -269,22 +262,27 @@ namespace SinkMyBattleshipWPF.ViewModels
                                         LastAction = "";
                                         break;
                                     }
+                                    else if (!CommandSyntaxCheck(LastAction))
+                                    {
+                                        Logger.AddToLog(AnswerCodes.Syntax_Error.GetDescription());
+                                    }
+                                    else if (!CommandSequenceCheck(LastAction, handshake, start))
+                                    {
+                                        Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
+                                    }
+
+                                    LastAction = "";
 
                                 }
-
-
-
+                                else
+                                {
+                                    Thread.Sleep(500);
+                                }
                             }
-
                         }
-
-
-
                     }
 
                 }
-
-
             }
         }
 
@@ -296,8 +294,11 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public bool CommandSyntaxCheck(string input)
         {
-            var input1 = input.Split(' ')[0].ToUpper();
-            var input2 = input.Split(' ')[1].ToUpper();
+            var arr = input.Split(' ');
+            var input1 = arr[0].ToUpper();
+            string input2 = "";
+            if (arr.Length >= 2) input2 = arr[1].ToUpper();
+
             var commands = new List<string>() { "HELO", "START", "FIRE", "HELP" };
 
             if (!commands.Contains(input1))
@@ -358,60 +359,5 @@ namespace SinkMyBattleshipWPF.ViewModels
 
     }
 
-    public enum AnswerCodes
-    {
-        [Description("210 BATTLESHIP/1.0")]
-        Battleship = 210,
-
-        [Description("221 Client Starts")]
-        ClientStarts = 221,
-
-        [Description("222 Host Starts")]
-        HostStarts = 222,
-
-        [Description("230 Miss")]
-        Miss = 230,
-
-        [Description("241 You hit my Carrier")]
-        YouHitMyCarrier = 241,
-
-        [Description("242 You hit my Battleship")]
-        YouHitMyBattleship = 242,
-
-        [Description("243 You hit my Destroyer")]
-        YouHitMyDestroyer = 243,
-
-        [Description("244 You hit my Submarine")]
-        YouHitMySubmarine = 244,
-
-        [Description("245 You hit my Patrol Boat")]
-        YouHitMyPatrolBpat = 245,
-
-        [Description("251 You sunk my Carrier")]
-        YouSunkMyCarrier = 251,
-
-        [Description("252 You sunk my Battleship")]
-        YouSunkMyBattleship = 252,
-
-        [Description("253 You sunk my Destroyer")]
-        YouSunkMyDestroyer = 253,
-
-        [Description("254 You sunk my Submarine")]
-        YouSunkMySubmarine = 254,
-
-        [Description("255 You sunk my Patrol Boat")]
-        YouSunkMyPatrolBoat = 255,
-
-        [Description("260 You win")]
-        YouWin = 260,
-
-        [Description("270 Connection closed")]
-        ConnectionClosed = 270,
-
-        [Description("500 Syntax Error")]
-        Syntax_Error = 500,
-
-        [Description("501 Sequence Error")]
-        Sequence_Error = 501
-    }
+    
 }
