@@ -10,15 +10,20 @@ namespace SinkMyBattleshipWPF.Models
     {
         public string Name { get; set; }
 
-        public List<string> Coordinates { get; set; } = new List<string>();
+        public Dictionary<string, bool> Coordinates { get; set; } = new Dictionary<string, bool>();
 
         public bool Alive { get; set; }
 
-        public Boat(string name, List<string> coordinates)
+        public Position Position { get; set; } 
+
+        public Boat(string name, Dictionary<string, bool> coordinates)
         {
             Alive = true;
             Name = name;
             Coordinates = coordinates;
+
+            Position = new Position(Coordinates.First().Key, coordinates.Count);
+            Position.Horizontal = true;
         }
     }
 

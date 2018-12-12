@@ -20,6 +20,13 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public MainViewModel(Player player)
         {
+            Opponent = new Player(null, null, 0, new List<Boat>());
+            Opponent.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false }, { "A2", false }, { "A3", false }, { "A4", false }, { "A5", false } }));
+            Opponent.Boats.Add(new Boat("Battleship", new Dictionary<string, bool>() { { "B1", false }, { "B2", false }, { "B3", false }, { "B4", false }, }));
+            Opponent.Boats.Add(new Boat("Destroyer", new Dictionary<string, bool>() { { "C1", false }, { "C2", false }, { "C3", false } }));
+            Opponent.Boats.Add(new Boat("Submarine", new Dictionary<string, bool>() { { "D1", false }, { "D2", false }, { "D3", false } }));
+            Opponent.Boats.Add(new Boat("Patrol Boat", new Dictionary<string, bool>() { { "E1", false }, { "E2", false } }));
+
             if (string.IsNullOrEmpty(player.Address))
 
             {
@@ -30,6 +37,8 @@ namespace SinkMyBattleshipWPF.ViewModels
                 Task.Run(() => StartClient(player));
             }
         }
+
+        public Player Opponent { get; set; }
 
         public static Logger Logger { get; set; } = new Logger();
 
@@ -64,7 +73,6 @@ namespace SinkMyBattleshipWPF.ViewModels
             {
                 var command = "";
                 LastAction = "";
-                var playerServer = new Player(null, null, 0, null);
                 var continuePlay = true;
 
                 Logger.AddToLog($"Ansluten till {client.Client.RemoteEndPoint}");
@@ -102,12 +110,12 @@ namespace SinkMyBattleshipWPF.ViewModels
                 if(command.StartsWith("221"))
                 {
                     player.Turn = 1;
-                    playerServer.Turn = 2;
+                    Opponent.Turn = 2;
                 }
                 else
                 {
                     player.Turn = 2;
-                    playerServer.Turn = 1;
+                    Opponent.Turn = 1;
                 }
                 Logger.AddToLog(command);
 
@@ -116,7 +124,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                     for (int i = 1; i < 3; i++)
                     {
                         // Server command - game logic
-                        while (playerServer.Turn == i && continuePlay)
+                        while (Opponent.Turn == i && continuePlay)
                         {
                             command = await reader.ReadLineAsync();
                             Logger.AddToLog($"Server: {command}");
@@ -124,7 +132,8 @@ namespace SinkMyBattleshipWPF.ViewModels
                             if (command.ToLower().StartsWith("fire "))
                             {
                                 // Game logic
-                                //writer.WriteLine(AnswerCodes.YouHitMyBattleship.GetDescription());
+                                Logger.AddToLog(command);
+                                Logger.AddToLog(reader.ReadLine());
                                 LastAction = "";
                                 break;
                             }
@@ -191,7 +200,6 @@ namespace SinkMyBattleshipWPF.ViewModels
             }
         }
 
-
         static void StartListen(int port)
         {
             try
@@ -229,7 +237,6 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                     var handshake = false;
                     var start = false;
-                    var clientPlayer = new Player(null, null, 0, null);
                     var continuePlay = true;
 
                     while (client.Connected && continuePlay)
@@ -247,7 +254,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 Logger.AddToLog(command);
                                 writer.WriteLine($"220 {player.Name}");
                                 Logger.AddToLog($"220 {player.Name}");
-                                clientPlayer.Name = command.Split(' ')[1];
+                                Opponent.Name = command.Split(' ')[1];
                             }
                             else if (command.ToUpper() == "QUIT")
                             {
@@ -278,7 +285,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 var random = new Random();
                                 var number = random.Next(0, 2) + 1;
                                 player.Turn = number;
-                                clientPlayer.Turn = number == 1 ? 2 : 1;
+                                Opponent.Turn = number == 1 ? 2 : 1;
 
                                 if (player.Turn == 1)
                                 {
@@ -309,7 +316,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                         for (int i = 1; i < 3; i++)
                         {
                             // wait for correct action from client
-                            while (start && clientPlayer.Turn == i && continuePlay)
+                            while (start && Opponent.Turn == i && continuePlay)
                             {
                                 command = reader.ReadLine();
 
@@ -333,7 +340,9 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     {
                                         // Game logic
                                         Logger.AddToLog($"Klient: {command}");
-                                        //writer.WriteLine($"Waiting for opponents action..");
+                                        Opponent.FireAt(command);
+                                        player.GetFiredAt(command);
+                                        writer.WriteLine(player.GetFiredAtMessage(command));
                                         LastAction = "";
                                         break;
                                     }
@@ -355,8 +364,20 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 {
                                     if (LastAction.ToLower().StartsWith("fire "))
                                     {
-                                        writer.WriteLine(LastAction);
-                                        Logger.AddToLog(LastAction);
+
+                                        if (player.CheckFiredAt(LastAction))
+                                        {
+                                            writer.WriteLine(LastAction);
+                                            Logger.AddToLog(LastAction);
+
+                                            player.FireAt(LastAction);
+                                            Opponent.GetFiredAt(LastAction);
+
+                                            writer.WriteLine(Opponent.GetFiredAtMessage(LastAction));
+                                            Logger.AddToLog(Opponent.GetFiredAtMessage(LastAction));
+
+                                        }
+
                                         Logger.AddToLog("Waiting for opponents action..");
                                         LastAction = "";
                                         break;
@@ -453,6 +474,8 @@ namespace SinkMyBattleshipWPF.ViewModels
             }
             return true;
         }
+
+
 
         
 

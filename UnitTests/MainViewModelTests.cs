@@ -4,6 +4,7 @@ using SinkMyBattleshipWPF.Models;
 using SinkMyBattleshipWPF.ViewModels;
 using SinkMyBattleshipWPF.Extensions;
 using SinkMyBattleshipWPF.Utils;
+using System.Collections.Generic;
 
 namespace UnitTests
 {
@@ -78,6 +79,129 @@ namespace UnitTests
 
             //assert
             Assert.IsFalse(test);
+        }
+
+        [TestMethod]
+        public void FireAtIsTrue()
+        {
+            //arrange
+            var input = "fira a1";
+            var player = new Player(null, "", 0, null);
+
+            //act
+            var test = player.FireAt(input);
+
+            //assert
+            Assert.AreEqual("A1", test);
+        }
+
+        [TestMethod]
+        public void CheckFiredAtIsTrue()
+        {
+            //arrange
+            var input = "fira a1";
+            var player = new Player(null, "", 0, null);
+
+            //act
+            var test = player.CheckFiredAt(input);
+
+            //assert
+            Assert.AreEqual(false, test);
+        }
+
+        [TestMethod]
+        public void GetFiredAtIsFalse()
+        {
+            //arrange
+            var input = "fira b1";
+            var player = new Player(null, "", 0, new List<Boat>());
+            player.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false }, { "A2", false }, { "A3", false }, { "A4", false }, { "A5", false } }));
+
+            //act
+            var test = player.GetFiredAt(input);
+
+            //assert
+            Assert.AreEqual(false, test);
+        }
+
+        [TestMethod]
+        public void GetFiredAtIsTrue()
+        {
+            //arrange
+            var input = "fira a1";
+            var player = new Player(null, "", 0, new List<Boat>());
+            player.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false }, { "A2", false }, { "A3", false }, { "A4", false }, { "A5", false } }));
+
+            //act
+            var test = player.GetFiredAt(input);
+
+            //assert
+            Assert.AreEqual(true, test);
+        }
+
+        [TestMethod]
+        public void GetFiredAtMessageIsTrue()
+        {
+            //arrange
+            var input = "fira a1";
+            var player = new Player(null, "", 0, new List<Boat>());
+            player.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false }, { "A2", false }, { "A3", false }, { "A4", false }, { "A5", false } }));
+
+            //act
+            var test = player.GetFiredAtMessage(input);
+
+            //assert
+            Assert.AreEqual(AnswerCodes.YouHitMyCarrier.GetDescription(), test);
+        }
+
+        [TestMethod]
+        public void GetFiredAtMessageYouWon()
+        {
+            //arrange
+            var input = "fira a1";
+            var player = new Player(null, "", 0, new List<Boat>());
+            player.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false } }));
+
+            //act
+            player.GetFiredAt(input);
+            var test = player.GetFiredAtMessage(input);
+
+            //assert
+            Assert.AreEqual(AnswerCodes.YouWin.GetDescription(), test);
+        }
+
+        [TestMethod]
+        public void GetFiredAtMessageYouSunk()
+        {
+            //arrange
+            var input = "fira a1";
+            var player = new Player(null, "", 0, new List<Boat>());
+            player.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false } }));
+            player.Boats.Add(new Boat("Destroyer", new Dictionary<string, bool>() { { "B1", false } }));
+
+            //act
+            player.GetFiredAt(input);
+            var test = player.GetFiredAtMessage(input);
+
+            //assert
+            Assert.AreEqual(AnswerCodes.YouSunkMyCarrier.GetDescription(), test);
+        }
+
+        [TestMethod]
+        public void GetFiredAtMessageMiss()
+        {
+            //arrange
+            var input = "fira C1";
+            var player = new Player(null, "", 0, new List<Boat>());
+            player.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false } }));
+            player.Boats.Add(new Boat("Destroyer", new Dictionary<string, bool>() { { "B1", false } }));
+
+            //act
+            player.GetFiredAt(input);
+            var test = player.GetFiredAtMessage(input);
+
+            //assert
+            Assert.AreEqual(AnswerCodes.Miss.GetDescription(), test);
         }
 
         [TestMethod]
