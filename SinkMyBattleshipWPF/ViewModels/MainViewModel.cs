@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using SinkMyBattleshipWPF.Extensions;
 using SinkMyBattleshipWPF.Utils;
 using System.Threading;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace SinkMyBattleshipWPF.ViewModels
 {
@@ -20,6 +22,7 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public MainViewModel(Player player)
         {
+            Player = player;
             Opponent = new Player(null, null, 0, new List<Boat>());
             Opponent.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false }, { "A2", false }, { "A3", false }, { "A4", false }, { "A5", false } }));
             Opponent.Boats.Add(new Boat("Battleship", new Dictionary<string, bool>() { { "B1", false }, { "B2", false }, { "B3", false }, { "B4", false }, }));
@@ -36,9 +39,13 @@ namespace SinkMyBattleshipWPF.ViewModels
             {
                 Task.Run(() => StartClient(player));
             }
+
+
         }
 
         public Player Opponent { get; set; }
+
+        public Player Player { get; set; }
 
         public static Logger Logger { get; set; } = new Logger();
 
@@ -63,6 +70,24 @@ namespace SinkMyBattleshipWPF.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        private void DrawBoats()
+        {
+            foreach (var boat in Player.Boats)
+            {
+                var obj = new Border();
+
+                obj.Name = new Position("A1", 1).GetCoordinateFrom(i, j);
+                obj.Background = Brushes.AliceBlue;
+
+                Grid.SetRow(obj, i);
+                Grid.SetColumn(obj, j);
+
+                //GridLayout.Children.Add(obj);
+
+            }
+
+
+        }
 
         private async Task StartClient(Player player)
         {

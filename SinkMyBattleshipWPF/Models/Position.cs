@@ -127,5 +127,50 @@ namespace SinkMyBattleshipWPF.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        public string GetCoordinateFrom(int row, int column)
+        {
+            var coordinate = "";
+            switch (row)
+            {
+                case 1:
+                    coordinate += "A";
+                    break;
+                case 2:
+                    coordinate += "B";
+                    break;
+                case 3:
+                    coordinate += "C";
+                    break;
+                case 4:
+                    coordinate += "D";
+                    break;
+                case 5:
+                    coordinate += "E";
+                    break;
+                case 6:
+                    coordinate += "F";
+                    break;
+                case 7:
+                    coordinate += "G";
+
+                    break;
+                case 8:
+                    coordinate += "H";
+                    break;
+                case 9:
+                    coordinate += "I";
+                    break;
+                case 10:
+                    coordinate += "J";
+                    break;
+                default:
+                    break;
+            }
+
+            coordinate += column;
+
+            return coordinate;
+        }
+
     }
 }

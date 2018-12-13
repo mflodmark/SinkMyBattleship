@@ -91,7 +91,7 @@
                     Grid.Row="{Binding Boat1.Position.Row}" 
                     Grid.Column="{Binding Boat1.Position.Column}" 
                     Grid.RowSpan="{Binding Boat1.Position.RowSpan}" 
-                    Background="DarkBlue"/>
+                    Background="DarkBlue" Opacity="0.5"/>
             
             <Border Grid.ColumnSpan="{Binding Boat2.Position.ColumnSpan}" 
                     Grid.Row="{Binding Boat2.Position.Row}" 
@@ -117,10 +117,10 @@
                     Grid.RowSpan="{Binding Boat5.Position.RowSpan}" 
                     Background="Yellow"/>
 
-            <Label Grid.Row="2" Grid.Column="11" Grid.ColumnSpan="2" Content="Carrier:"></Label>
+            <!--<Label Grid.Row="2" Grid.Column="11" Grid.ColumnSpan="2" Content="Carrier:"></Label>
             <TextBox x:Name="CarrierRow" Grid.Row="2" Grid.Column="13"></TextBox>
             <TextBox x:Name="CarrierColumn" Grid.Row="2" Grid.Column="14"></TextBox>
-            <CheckBox x:Name="CarrierHorizontal" Grid.Row="2" Grid.Column="15"></CheckBox>
+            <CheckBox x:Name="CarrierHorizontal" Grid.Row="2" Grid.Column="15"></CheckBox>-->
         </Grid>
     </DockPanel>
 

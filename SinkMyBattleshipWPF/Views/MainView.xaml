@@ -16,7 +16,7 @@
             </MenuItem>
         </Menu>
 
-        <Grid>
+        <Grid x:Name="GridLayout">
             <Grid.RowDefinitions >
                 <RowDefinition Height="30"/>
                 <RowDefinition Height="30"/>
