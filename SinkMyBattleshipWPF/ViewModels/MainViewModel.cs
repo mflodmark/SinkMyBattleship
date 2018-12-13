@@ -70,25 +70,6 @@ namespace SinkMyBattleshipWPF.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void DrawBoats()
-        {
-            foreach (var boat in Player.Boats)
-            {
-                var obj = new Border();
-
-                obj.Name = new Position("A1", 1).GetCoordinateFrom(i, j);
-                obj.Background = Brushes.AliceBlue;
-
-                Grid.SetRow(obj, i);
-                Grid.SetColumn(obj, j);
-
-                //GridLayout.Children.Add(obj);
-
-            }
-
-
-        }
-
         private async Task StartClient(Player player)
         {
             using (var client = new TcpClient(player.Address, player.Port))
