@@ -168,8 +168,8 @@ namespace SinkMyBattleshipWPF.Models
 
     }
 
-    public class Board
-    {
-        List
-    }
+    //public class Board
+    //{
+    //    List
+    //}
 }
