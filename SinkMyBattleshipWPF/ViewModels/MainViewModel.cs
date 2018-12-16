@@ -47,6 +47,8 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public Player Player { get; set; }
 
+        public string FireAtTarget { get; set; }
+
         public static Logger Logger { get; set; } = new Logger();
 
         public event PropertyChangedEventHandler PropertyChanged;

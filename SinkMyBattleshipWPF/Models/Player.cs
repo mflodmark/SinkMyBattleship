@@ -167,4 +167,9 @@ namespace SinkMyBattleshipWPF.Models
         }
 
     }
+
+    public class Board
+    {
+        List
+    }
 }

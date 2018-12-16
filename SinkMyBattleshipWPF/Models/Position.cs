@@ -152,7 +152,6 @@ namespace SinkMyBattleshipWPF.Models
                     break;
                 case 7:
                     coordinate += "G";
-
                     break;
                 case 8:
                     coordinate += "H";

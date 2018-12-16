@@ -105,7 +105,8 @@
                 <TextBox src:TextBoxBehaviour.ScrollOnTextChanged="True" VerticalScrollBarVisibility="Auto" 
                          IsEnabled="False" Text="{Binding Logger.Log}"></TextBox>
             </ScrollViewer>
-            
+
+            <Label x:Name="FireAtTarget" Opacity="0"></Label>
         </Grid>
     </DockPanel>
 </Window>

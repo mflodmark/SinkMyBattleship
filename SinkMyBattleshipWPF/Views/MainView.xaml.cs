@@ -23,7 +23,7 @@ namespace SinkMyBattleshipWPF.Views
     /// </summary>
     public partial class MainView : Window
     {
-        private readonly Player _player;
+        //private readonly Player _player;
 
         public MainView()
         {
@@ -42,8 +42,8 @@ namespace SinkMyBattleshipWPF.Views
                 {
                     var newBtn = new Button();
 
-                    newBtn.Name = new Position("A1", 1).GetCoordinateFrom(i, j);
-                    newBtn.Content = newBtn.Name;
+                    newBtn.Name = "t_" + new Position("A1", 1).GetCoordinateFrom(i, j);
+                    newBtn.Content = new Position("A1", 1).GetCoordinateFrom(i, j);
                     newBtn.Background = Brushes.AliceBlue;
                     newBtn.Click += SendAction_Click;
 
@@ -66,8 +66,8 @@ namespace SinkMyBattleshipWPF.Views
                 {
                     var newBtn = new Button();
                     var minus = 11;
-                    newBtn.Name = new Position("A1", 1).GetCoordinateFrom(i, j-minus);
-                    newBtn.Content = newBtn.Name;
+                    newBtn.Name = "o_" + new Position("A1", 1).GetCoordinateFrom(i, j-minus);
+                    newBtn.Content = new Position("A1", 1).GetCoordinateFrom(i, j - minus);
                     newBtn.Background = Brushes.AliceBlue;
                     newBtn.Click += SendAction_Click;
                     newBtn.IsEnabled = false;
@@ -85,7 +85,7 @@ namespace SinkMyBattleshipWPF.Views
         private void SendAction_Click(object sender, RoutedEventArgs e)
         {
             var obj = sender as Button;
-            Action.Text = $"FIRE {obj.Name}";
+            Action.Text = $"FIRE {obj.Content}";
             var peer = new ButtonAutomationPeer(SendAction);
             var invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
             invokeProv.Invoke();
