@@ -28,30 +28,51 @@ namespace SinkMyBattleshipWPF.ViewModels
 
             Player = player;
             Opponent = new Player(null, null, 0, new List<Boat>());
-            Opponent.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false }, { "A2", false }, { "A3", false }, { "A4", false }, { "A5", false } }));
-            Opponent.Boats.Add(new Boat("Battleship", new Dictionary<string, bool>() { { "B1", false }, { "B2", false }, { "B3", false }, { "B4", false }, }));
-            Opponent.Boats.Add(new Boat("Destroyer", new Dictionary<string, bool>() { { "C1", false }, { "C2", false }, { "C3", false } }));
-            Opponent.Boats.Add(new Boat("Submarine", new Dictionary<string, bool>() { { "D1", false }, { "D2", false }, { "D3", false } }));
-            Opponent.Boats.Add(new Boat("Patrol Boat", new Dictionary<string, bool>() { { "E1", false }, { "E2", false } }));
+            //Opponent.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false }, { "A2", false }, { "A3", false }, { "A4", false }, { "A5", false } }));
+            //Opponent.Boats.Add(new Boat("Battleship", new Dictionary<string, bool>() { { "B1", false }, { "B2", false }, { "B3", false }, { "B4", false }, }));
+            //Opponent.Boats.Add(new Boat("Destroyer", new Dictionary<string, bool>() { { "C1", false }, { "C2", false }, { "C3", false } }));
+            //Opponent.Boats.Add(new Boat("Submarine", new Dictionary<string, bool>() { { "D1", false }, { "D2", false }, { "D3", false } }));
+            //Opponent.Boats.Add(new Boat("Patrol Boat", new Dictionary<string, bool>() { { "E1", false }, { "E2", false } }));
 
-            Boat1 = Player.Boats[0];
-            Boat2 = Player.Boats[1];
-            Boat3 = Player.Boats[2];
-            Boat4 = Player.Boats[3];
-            Boat5 = Player.Boats[4];
-
-            foreach (var item in Player.Boats)
+            if (player.Boats != null)
             {
-                item.Position.Column += 11;
+                Boat1 = Player.Boats[0];
+                Boat2 = Player.Boats[1];
+                Boat3 = Player.Boats[2];
+                Boat4 = Player.Boats[3];
+                Boat5 = Player.Boats[4];
+
+                foreach (var item in Player.Boats)
+                {
+                    item.Position.Column += 11;
+                }
+
             }
 
-            if (string.IsNullOrEmpty(player.Address))
+            try
             {
-                Task.Run(() => StartServer(player));
+                if (string.IsNullOrEmpty(player.Address))
+                {
+                    Task.Run(() => StartServer(player));
+                }
+                else
+                {
+                    Task.Run(() => StartClient(player));
+                }
+
             }
-            else
+            catch (IOException)
             {
-                Task.Run(() => StartClient(player));
+                //Logger.AddToLog(e.Message);
+                Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                Logger.AddToLog("Någonting gick fel - Restart!");
+                listener.Stop();
+            }
+            catch (Exception)
+            {
+                Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                Logger.AddToLog("Någonting gick fel - Restart!");
+                listener.Stop();
             }
 
 
@@ -75,7 +96,7 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         static TcpListener listener;
 
-        public string LastAction { get; set; }
+        public string LastAction { get; set; } = "";
 
         public string Action
         {
@@ -239,8 +260,8 @@ namespace SinkMyBattleshipWPF.ViewModels
             }
             catch (SocketException)
             {
-                Logger.AddToLog("Misslyckades att öppna socket. Troligtvis upptagen.");
-                Environment.Exit(1);
+                Logger.AddToLog("Misslyckades att öppna socket. Troligtvis upptagen. Restart!");
+                listener.Stop();
             }
         }
 
@@ -315,8 +336,10 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 // logic for who starts the game
                                 var random = new Random();
                                 var number = random.Next(0, 2) + 1;
-                                player.Turn = number;
-                                Opponent.Turn = number == 1 ? 2 : 1;
+                                //player.Turn = number;
+                                //Opponent.Turn = number == 1 ? 2 : 1;
+                                player.Turn = 1;
+                                Opponent.Turn = 2;
 
                                 if (player.Turn == 1)
                                 {
@@ -394,6 +417,13 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     break;
                                 }
 
+                                if (command.StartsWith("23") || command.StartsWith("24") || command.StartsWith("25"))
+                                {
+                                    Logger.AddToLog(command);
+                                    Logger.AddToLog("Waiting for opponents action..");
+                                    continue;
+                                }
+
                                 if (!CommandSyntaxCheck(command))
                                 {
                                     errorCounterClient += 1;
@@ -413,8 +443,15 @@ namespace SinkMyBattleshipWPF.ViewModels
                                         Opponent.FireAt(command);
                                         player.GetFiredAt(command);
                                         writer.WriteLine(player.GetFiredAtMessage(command));
-                                        Logger.AddToLog(player.GetFiredAtMessage(command));
-                                        Logger.AddToLog("It's your turn!");
+                                        if (player.GetFiredAtMessage(command) == AnswerCodes.YouWin.GetDescription())
+                                        {
+                                            Logger.AddToLog("You lost...");
+                                            continuePlay = false;
+                                        }
+                                        else
+                                        {
+                                            Logger.AddToLog("It's your turn!");
+                                        }
                                         LastAction = "";
                                         errorCounterClient = 0;
                                         break;
@@ -470,19 +507,24 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     if (LastAction.ToLower().StartsWith("fire "))
                                     {
 
-                                        if (player.CheckFiredAt(LastAction))
+                                        if (!player.CheckFiredAt(LastAction))
                                         {
                                             writer.WriteLine(LastAction);
                                             Logger.AddToLog(LastAction);
 
                                             player.FireAt(LastAction);
 
+                                            Logger.AddToLog("Waiting for opponents response..");
+                                            LastAction = "";
+                                            errorCounterServer = 0;
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
+                                            errorCounterServer += 1;
                                         }
 
-                                        Logger.AddToLog("Waiting for opponents response..");
-                                        LastAction = "";
-                                        errorCounterServer = 0;
-                                        break;
                                     }
                                     else if (!CommandSyntaxCheck(LastAction))
                                     {

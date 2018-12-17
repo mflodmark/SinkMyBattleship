@@ -75,7 +75,7 @@ namespace SinkMyBattleshipWPF.Views
 
                     //newBtn.SetBinding(ContentProperty, binding);
                     newBtn.Background = Brushes.LightBlue;
-                    newBtn.Click += SendAction_Click;
+                    //newBtn.Click += SendAction_Click;
                     //newBtn.IsEnabled = false;
                     newBtn.Opacity = 0.8;
 

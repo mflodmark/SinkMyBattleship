@@ -25,6 +25,9 @@ namespace UnitTests
             Assert.IsTrue(test);
         }
 
+
+
+
         [TestMethod]
         public void FireSyntaxCheckIsFalse()
         {
@@ -44,6 +47,20 @@ namespace UnitTests
         {
             //arrange
             var input = "FIRE A3";
+            var main = new MainViewModel(new Player(null, "", 0, null));
+
+            //act
+            var test = main.CommandSyntaxCheck(input);
+
+            //assert
+            Assert.IsTrue(test);
+        }
+
+        [TestMethod]
+        public void CommandSyntaxCheckToLowerIsTrue()
+        {
+            //arrange
+            var input = "fire a2";
             var main = new MainViewModel(new Player(null, "", 0, null));
 
             //act
@@ -97,6 +114,21 @@ namespace UnitTests
 
         [TestMethod]
         public void CheckFiredAtIsTrue()
+        {
+            //arrange
+            var input = "fira a1";
+            var player = new Player(null, "", 0, null);
+
+            //act
+            player.FireAt(input);
+            var test = player.CheckFiredAt(input);
+
+            //assert
+            Assert.AreEqual(true, test);
+        }
+
+        [TestMethod]
+        public void CheckFiredAtIsFalse()
         {
             //arrange
             var input = "fira a1";
