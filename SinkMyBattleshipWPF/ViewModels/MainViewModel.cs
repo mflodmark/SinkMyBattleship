@@ -336,10 +336,8 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 // logic for who starts the game
                                 var random = new Random();
                                 var number = random.Next(0, 2) + 1;
-                                //player.Turn = number;
-                                //Opponent.Turn = number == 1 ? 2 : 1;
-                                player.Turn = 1;
-                                Opponent.Turn = 2;
+                                player.Turn = number;
+                                Opponent.Turn = number == 1 ? 2 : 1;
 
                                 if (player.Turn == 1)
                                 {
