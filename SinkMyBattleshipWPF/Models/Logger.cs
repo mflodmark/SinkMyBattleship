@@ -51,5 +51,11 @@ namespace SinkMyBattleshipWPF.Models
             LogList.Add(text);
             LogList = LogList;
         }
+
+        public void ClearLog()
+        {
+            Log = "";
+            LogList = new List<string>();
+        }
     }
 }

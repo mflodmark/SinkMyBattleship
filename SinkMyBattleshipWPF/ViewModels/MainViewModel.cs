@@ -67,6 +67,8 @@ namespace SinkMyBattleshipWPF.ViewModels
         public Boat Boat4 { get; set; }
         public Boat Boat5 { get; set; }
 
+        //public bool ContinuePlayServer { get; set; } = true;
+
         public static Logger Logger { get; set; } = new Logger();
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -102,7 +104,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                 var continuePlay = true;
 
                 Logger.AddToLog($"Ansluten till {client.Client.RemoteEndPoint}");
-                
+
                 // Check battleship
                 command = reader.ReadLine();
                 if (!command.StartsWith("210"))
@@ -133,7 +135,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                 Logger.AddToLog("START");
 
                 command = reader.ReadLine();
-                if(command.StartsWith("221"))
+                if (command.StartsWith("221"))
                 {
                     player.Turn = 1;
                     Opponent.Turn = 2;
@@ -173,7 +175,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                             }
 
 
-                            
+
 
                         }
 
@@ -202,6 +204,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                         continue;
                                     }
 
+                                    Logger.AddToLog("Waiting for opponents response");
                                     LastAction = "";
                                     break;
                                 }
@@ -354,6 +357,27 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     break; // TODO: do some logging
                                 }
 
+                                if (command.Trim().ToUpper() == "HELP")
+                                {
+                                    writer.WriteLine(@"Write QUIT to terminate connection.
+                                                    Write Fire <Coordinate> to fire. 
+                                                    Write QUIT to terminate connection.
+                                                    IF opponent misses your boats, write '230 <Message>'.
+                                                    If your opponent HIT your Carrier, write '241 <Message>'.
+                                                    If your opponent HIT your Battleship, write '242 <Message>'.
+                                                    If your opponent HIT your Destroyer, write '243 <Message>'.
+                                                    If your opponent HIT your Submariner, write '244 <Message>'.
+                                                    If your opponent HIT your Patrol Boat, write '245 <Message>'.
+
+                                                    If your opponent SUNK your Carrier, write '251 <Message>'.
+                                                    If your opponent SUNK your Battleship, write '252 <Message>'.
+                                                    If your opponent SUNK your Destroyer, write '253 <Message>'.
+                                                    If your opponent SUNK your Submariner, write '254 <Message>'.
+                                                    If your opponent SUNK your Patrol Boat, write '255 <Message>'.
+
+                                                    If your opponent wins, write '260 <Message>'");
+                                }
+
                                 if (command.StartsWith("270") || command == null)
                                 {
                                     Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
@@ -365,7 +389,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 if (command.StartsWith("260"))
                                 {
                                     writer.WriteLine(command);
-                                    Logger.AddToLog(command); 
+                                    Logger.AddToLog(command);
                                     continuePlay = false;
                                     break;
                                 }
@@ -390,6 +414,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                         player.GetFiredAt(command);
                                         writer.WriteLine(player.GetFiredAtMessage(command));
                                         Logger.AddToLog(player.GetFiredAtMessage(command));
+                                        Logger.AddToLog("It's your turn!");
                                         LastAction = "";
                                         errorCounterClient = 0;
                                         break;
@@ -407,7 +432,7 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                                 }
 
-                                if (errorCounterClient == 3)
+                                if (errorCounterClient > 3)
                                 {
                                     continuePlay = false;
                                     Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
@@ -434,6 +459,12 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     break;
                                 }
 
+                                if (LastAction == "RestartServer")
+                                {
+                                    continuePlay = false;
+                                    break;
+                                }
+
                                 if (!string.IsNullOrEmpty(LastAction))
                                 {
                                     if (LastAction.ToLower().StartsWith("fire "))
@@ -448,7 +479,7 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                                         }
 
-                                        //Logger.AddToLog("Waiting for opponents action..");
+                                        Logger.AddToLog("Waiting for opponents response..");
                                         LastAction = "";
                                         errorCounterServer = 0;
                                         break;
@@ -465,7 +496,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     }
 
                                     LastAction = "";
-                                    if (errorCounterServer == 3)
+                                    if (errorCounterServer > 3)
                                     {
                                         Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
                                         writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
@@ -479,8 +510,15 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 }
                             }
                         }
-                    }
 
+
+                    }
+                }
+                if (LastAction == "RestartServer")
+                {
+
+                    Restart();
+                    break;
                 }
             }
         }
@@ -556,13 +594,22 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public void RestartServer()
         {
+            //LastAction = "RestartServer";
+            listener.Stop();
+            Logger.ClearLog();
             var manager = new WindowManager();
             manager.ShowWindow(new ShellViewModel(), null);
             Application.Current.Windows[0].Close();
+        }
 
+        private void Restart()
+        {
+            var manager = new WindowManager();
+            manager.ShowWindow(new ShellViewModel(), null);
+            Application.Current.Windows[0].Close();
         }
 
     }
 
-    
+
 }
