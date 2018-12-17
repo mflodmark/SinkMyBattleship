@@ -68,6 +68,12 @@ namespace SinkMyBattleshipWPF.Views
                     var minus = 11;
                     newBtn.Name = "o_" + new Position("A1", 1).GetCoordinateFrom(i, j-minus);
                     newBtn.Content = new Position("A1", 1).GetCoordinateFrom(i, j - minus);
+                    //var binding = new Binding("Player.Name");
+                    ////var binding = new Binding("Player.Board['A1']");
+                    //binding.Source = newBtn;
+
+
+                    //newBtn.SetBinding(ContentProperty, binding);
                     newBtn.Background = Brushes.LightBlue;
                     newBtn.Click += SendAction_Click;
                     //newBtn.IsEnabled = false;
@@ -77,7 +83,6 @@ namespace SinkMyBattleshipWPF.Views
                     Grid.SetColumn(newBtn, j);
 
                     GridLayout.Children.Add(newBtn);
-
                 }
 
             }
@@ -86,6 +91,7 @@ namespace SinkMyBattleshipWPF.Views
         private void SendAction_Click(object sender, RoutedEventArgs e)
         {
             var obj = sender as Button;
+            obj.Background = Brushes.White;
             Action.Text = $"FIRE {obj.Content}";
             var peer = new ButtonAutomationPeer(SendAction);
             var invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;

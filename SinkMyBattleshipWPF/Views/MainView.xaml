@@ -100,13 +100,13 @@
             <Label Grid.Column="1" Grid.Row="12" Grid.ColumnSpan="2" Content="Action:"></Label>
             <TextBox x:Name="Action" Grid.Column="3" Grid.Row="12" Grid.ColumnSpan="5"></TextBox>
             <Button x:Name="SendAction" Grid.Column="8" Grid.Row="12" Content="Send"></Button>
+            
+            <Button x:Name="RestartServer" Grid.Column="12" Grid.Row="12" Grid.ColumnSpan="3" Content="Restart Server"></Button>
 
-            <ScrollViewer Grid.Column="1" Grid.ColumnSpan="8" Grid.Row="13" Grid.RowSpan="10" Background="White">
+            <ScrollViewer Grid.Column="1" Grid.ColumnSpan="15" Grid.Row="13" Grid.RowSpan="10" Background="White">
                 <TextBox src:TextBoxBehaviour.ScrollOnTextChanged="True" VerticalScrollBarVisibility="Auto" 
                          IsEnabled="False" Text="{Binding Logger.Log}"></TextBox>
             </ScrollViewer>
-
-            <Label x:Name="FireAtTarget" Opacity="0"></Label>
 
             <Border Grid.ColumnSpan="{Binding Boat1.Position.ColumnSpan}" 
                     Grid.Row="{Binding Boat1.Position.Row}" 

@@ -13,6 +13,8 @@ using SinkMyBattleshipWPF.Utils;
 using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Caliburn.Micro;
+using System.Windows;
 
 namespace SinkMyBattleshipWPF.ViewModels
 {
@@ -22,6 +24,8 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public MainViewModel(Player player)
         {
+            Game.Player = player;
+
             Player = player;
             Opponent = new Player(null, null, 0, new List<Boat>());
             Opponent.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false }, { "A2", false }, { "A3", false }, { "A4", false }, { "A5", false } }));
@@ -42,7 +46,6 @@ namespace SinkMyBattleshipWPF.ViewModels
             }
 
             if (string.IsNullOrEmpty(player.Address))
-
             {
                 Task.Run(() => StartServer(player));
             }
@@ -57,8 +60,6 @@ namespace SinkMyBattleshipWPF.ViewModels
         public Player Opponent { get; set; }
 
         public Player Player { get; set; }
-
-        public string FireAtTarget { get; set; }
 
         public Boat Boat1 { get; set; }
         public Boat Boat2 { get; set; }
@@ -263,6 +264,8 @@ namespace SinkMyBattleshipWPF.ViewModels
                     var handshake = false;
                     var start = false;
                     var continuePlay = true;
+                    var errorCounterClient = 0;
+                    var errorCounterServer = 0;
 
                     while (client.Connected && continuePlay)
                     {
@@ -351,12 +354,30 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     break; // TODO: do some logging
                                 }
 
+                                if (command.StartsWith("270") || command == null)
+                                {
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                    continuePlay = false;
+                                    errorCounterClient = 0;
+                                    break;
+                                }
+
+                                if (command.StartsWith("260"))
+                                {
+                                    writer.WriteLine(command);
+                                    Logger.AddToLog(command); 
+                                    continuePlay = false;
+                                    break;
+                                }
+
                                 if (!CommandSyntaxCheck(command))
                                 {
+                                    errorCounterClient += 1;
                                     writer.WriteLine(AnswerCodes.Syntax_Error.GetDescription());
                                 }
                                 else if (!CommandSequenceCheck(command, handshake, start))
                                 {
+                                    errorCounterClient += 1;
                                     writer.WriteLine(AnswerCodes.Sequence_Error.GetDescription());
                                 }
                                 else if (!string.IsNullOrEmpty(command))
@@ -368,10 +389,30 @@ namespace SinkMyBattleshipWPF.ViewModels
                                         Opponent.FireAt(command);
                                         player.GetFiredAt(command);
                                         writer.WriteLine(player.GetFiredAtMessage(command));
+                                        Logger.AddToLog(player.GetFiredAtMessage(command));
                                         LastAction = "";
+                                        errorCounterClient = 0;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        // Answer on a fired shot
+                                        Opponent.GetFiredAt(command);
+                                        writer.WriteLine(Opponent.GetFiredAtMessage(command));
+                                        Logger.AddToLog(Opponent.GetFiredAtMessage(command));
+                                        LastAction = "";
+                                        errorCounterClient = 0;
                                         break;
                                     }
 
+                                }
+
+                                if (errorCounterClient == 3)
+                                {
+                                    continuePlay = false;
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                    break;
                                 }
 
                             }
@@ -385,6 +426,14 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     break; // TODO: do some logging
                                 }
 
+                                if (LastAction.StartsWith("270"))
+                                {
+                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                    continuePlay = false;
+                                    break;
+                                }
+
                                 if (!string.IsNullOrEmpty(LastAction))
                                 {
                                     if (LastAction.ToLower().StartsWith("fire "))
@@ -396,27 +445,32 @@ namespace SinkMyBattleshipWPF.ViewModels
                                             Logger.AddToLog(LastAction);
 
                                             player.FireAt(LastAction);
-                                            Opponent.GetFiredAt(LastAction);
-
-                                            writer.WriteLine(Opponent.GetFiredAtMessage(LastAction));
-                                            Logger.AddToLog(Opponent.GetFiredAtMessage(LastAction));
 
                                         }
 
-                                        Logger.AddToLog("Waiting for opponents action..");
+                                        //Logger.AddToLog("Waiting for opponents action..");
                                         LastAction = "";
+                                        errorCounterServer = 0;
                                         break;
                                     }
                                     else if (!CommandSyntaxCheck(LastAction))
                                     {
                                         Logger.AddToLog(AnswerCodes.Syntax_Error.GetDescription());
+                                        errorCounterServer += 1;
                                     }
                                     else if (!CommandSequenceCheck(LastAction, handshake, start))
                                     {
                                         Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
+                                        errorCounterServer += 1;
                                     }
 
                                     LastAction = "";
+                                    if (errorCounterServer == 3)
+                                    {
+                                        Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                        writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                        break;
+                                    }
 
                                 }
                                 else
@@ -500,9 +554,13 @@ namespace SinkMyBattleshipWPF.ViewModels
             return true;
         }
 
+        public void RestartServer()
+        {
+            var manager = new WindowManager();
+            manager.ShowWindow(new ShellViewModel(), null);
+            Application.Current.Windows[0].Close();
 
-
-        
+        }
 
     }
 

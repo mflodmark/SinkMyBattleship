@@ -189,4 +189,10 @@ namespace SinkMyBattleshipWPF.Models
         // 0 == not fired at, 1= hit, 2 = miss
         public Dictionary<string, int> Coor { get; set; } = new Dictionary<string, int>();
     }
+
+    public static class Game
+    {
+        public static Player Player { get; set; }
+
+    }
 }

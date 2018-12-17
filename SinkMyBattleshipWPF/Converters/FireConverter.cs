@@ -30,6 +30,8 @@ namespace SinkMyBattleshipWPF.Converters
         //}
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            var text = (string)value;
+
             throw new NotImplementedException();
         }
 
