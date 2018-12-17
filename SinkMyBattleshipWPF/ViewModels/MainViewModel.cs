@@ -30,6 +30,17 @@ namespace SinkMyBattleshipWPF.ViewModels
             Opponent.Boats.Add(new Boat("Submarine", new Dictionary<string, bool>() { { "D1", false }, { "D2", false }, { "D3", false } }));
             Opponent.Boats.Add(new Boat("Patrol Boat", new Dictionary<string, bool>() { { "E1", false }, { "E2", false } }));
 
+            Boat1 = Player.Boats[0];
+            Boat2 = Player.Boats[1];
+            Boat3 = Player.Boats[2];
+            Boat4 = Player.Boats[3];
+            Boat5 = Player.Boats[4];
+
+            foreach (var item in Player.Boats)
+            {
+                item.Position.Column += 11;
+            }
+
             if (string.IsNullOrEmpty(player.Address))
 
             {
@@ -48,6 +59,12 @@ namespace SinkMyBattleshipWPF.ViewModels
         public Player Player { get; set; }
 
         public string FireAtTarget { get; set; }
+
+        public Boat Boat1 { get; set; }
+        public Boat Boat2 { get; set; }
+        public Boat Boat3 { get; set; }
+        public Boat Boat4 { get; set; }
+        public Boat Boat5 { get; set; }
 
         public static Logger Logger { get; set; } = new Logger();
 

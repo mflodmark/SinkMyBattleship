@@ -22,6 +22,8 @@ namespace SinkMyBattleshipWPF.Models
 
         public List<string> FiredAtOpponent { get; set; } = new List<string>();
 
+        public Board Board { get; set; }
+
         public Player(string name, string address, int port, List<Boat> boats)
         {
             Name = name;
@@ -166,10 +168,25 @@ namespace SinkMyBattleshipWPF.Models
             return myEnum.GetDescription();
         }
 
+
     }
 
-    //public class Board
-    //{
-    //    List
-    //}
+    public class Board
+    {
+        public Board()
+        {
+            // i = row, j = column
+            for (int i = 1; i <= 10; i++)
+            {
+                for (int j = 1; j <= 10; j++)
+                {
+                    Coor.Add(new Position("A1", 1).GetCoordinateFrom(i, j), 0);
+                }
+
+            }
+        }
+
+        // 0 == not fired at, 1= hit, 2 = miss
+        public Dictionary<string, int> Coor { get; set; } = new Dictionary<string, int>();
+    }
 }

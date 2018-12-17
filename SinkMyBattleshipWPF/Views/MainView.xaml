@@ -107,6 +107,36 @@
             </ScrollViewer>
 
             <Label x:Name="FireAtTarget" Opacity="0"></Label>
+
+            <Border Grid.ColumnSpan="{Binding Boat1.Position.ColumnSpan}" 
+                    Grid.Row="{Binding Boat1.Position.Row}" 
+                    Grid.Column="{Binding Boat1.Position.Column}" 
+                    Grid.RowSpan="{Binding Boat1.Position.RowSpan}" 
+                    Background="DarkBlue" Opacity="0.5"/>
+
+            <Border Grid.ColumnSpan="{Binding Boat2.Position.ColumnSpan}" 
+                    Grid.Row="{Binding Boat2.Position.Row}" 
+                    Grid.Column="{Binding Boat2.Position.Column}" 
+                    Grid.RowSpan="{Binding Boat2.Position.RowSpan}" 
+                    Background="Orange" Opacity="0.5"/>
+
+            <Border Grid.ColumnSpan="{Binding Boat3.Position.ColumnSpan}" 
+                    Grid.Row="{Binding Boat3.Position.Row}" 
+                    Grid.Column="{Binding Boat3.Position.Column}" 
+                    Grid.RowSpan="{Binding Boat3.Position.RowSpan}" 
+                    Background="Orange" Opacity="0.5"/>
+
+            <Border Grid.ColumnSpan="{Binding Boat4.Position.ColumnSpan}" 
+                    Grid.Row="{Binding Boat4.Position.Row}" 
+                    Grid.Column="{Binding Boat4.Position.Column}" 
+                    Grid.RowSpan="{Binding Boat4.Position.RowSpan}" 
+                    Background="Green" Opacity="0.5"/>
+
+            <Border Grid.ColumnSpan="{Binding Boat5.Position.ColumnSpan}" 
+                    Grid.Row="{Binding Boat5.Position.Row}" 
+                    Grid.Column="{Binding Boat5.Position.Column}" 
+                    Grid.RowSpan="{Binding Boat5.Position.RowSpan}" 
+                    Background="Yellow" Opacity="0.5"/>
         </Grid>
     </DockPanel>
 </Window>

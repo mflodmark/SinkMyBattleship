@@ -103,7 +103,7 @@
                     Grid.Row="{Binding Boat3.Position.Row}" 
                     Grid.Column="{Binding Boat3.Position.Column}" 
                     Grid.RowSpan="{Binding Boat3.Position.RowSpan}" 
-                    Background="Red"/>
+                    Background="Orange"/>
 
             <Border Grid.ColumnSpan="{Binding Boat4.Position.ColumnSpan}" 
                     Grid.Row="{Binding Boat4.Position.Row}" 

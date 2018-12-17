@@ -44,7 +44,7 @@ namespace SinkMyBattleshipWPF.Views
 
                     newBtn.Name = "t_" + new Position("A1", 1).GetCoordinateFrom(i, j);
                     newBtn.Content = new Position("A1", 1).GetCoordinateFrom(i, j);
-                    newBtn.Background = Brushes.AliceBlue;
+                    newBtn.Background = Brushes.LightBlue;
                     newBtn.Click += SendAction_Click;
 
                     Grid.SetRow(newBtn, i);
@@ -68,9 +68,10 @@ namespace SinkMyBattleshipWPF.Views
                     var minus = 11;
                     newBtn.Name = "o_" + new Position("A1", 1).GetCoordinateFrom(i, j-minus);
                     newBtn.Content = new Position("A1", 1).GetCoordinateFrom(i, j - minus);
-                    newBtn.Background = Brushes.AliceBlue;
+                    newBtn.Background = Brushes.LightBlue;
                     newBtn.Click += SendAction_Click;
-                    newBtn.IsEnabled = false;
+                    //newBtn.IsEnabled = false;
+                    newBtn.Opacity = 0.8;
 
                     Grid.SetRow(newBtn, i);
                     Grid.SetColumn(newBtn, j);
