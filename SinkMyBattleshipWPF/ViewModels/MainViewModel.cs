@@ -334,6 +334,8 @@ namespace SinkMyBattleshipWPF.ViewModels
                 {
                     boat.Coordinates = boat.Coordinates.ToDictionary(x => x.Key, x => false);
                 }
+                player.ClearBoardUI();
+                Opponent.ClearBoardUI();
 
                 player.FiredAtOpponent = new List<string>();
 

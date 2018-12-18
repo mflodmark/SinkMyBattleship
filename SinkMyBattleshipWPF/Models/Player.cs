@@ -198,6 +198,10 @@ namespace SinkMyBattleshipWPF.Models
             return myEnum.GetDescription();
         }
 
+        public void ClearBoardUI() {
+            OceanBoard.Coor = new Dictionary<string, int>();
+            OceanBoard.InitBoard();
+        }
 
     }
 

@@ -9,6 +9,11 @@ namespace SinkMyBattleshipWPF.Models
         {
             Coor = new Dictionary<string, int>();
 
+            InitBoard();
+        }
+
+        public void InitBoard()
+        {
             // i = row, j = column
             for (int i = 1; i <= 10; i++)
             {
