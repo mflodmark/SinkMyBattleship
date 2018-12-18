@@ -17,6 +17,8 @@ using Caliburn.Micro;
 using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Automation.Provider;
+using System.Timers;
+
 
 namespace SinkMyBattleshipWPF.ViewModels
 {
@@ -115,6 +117,24 @@ namespace SinkMyBattleshipWPF.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+
+        private static System.Timers.Timer aTimer;
+
+        private static void SetTimer()
+        {
+            // Create a timer with a two second interval.
+            aTimer = new System.Timers.Timer(2000);
+            // Hook up the Elapsed event for the timer. 
+            aTimer.AutoReset = true;
+            aTimer.Enabled = true;
+        }
+
+        private void StopTimer()
+        {
+            aTimer.Close();
+            aTimer.Dispose();
+        }
+
         private async Task StartClient(Player player)
         {
             // Reset boats status
@@ -200,7 +220,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                             // Server command - game logic
                             while (Opponent.Turn == i && continuePlay)
                             {
-                                command = await reader.ReadLineAsync();
+                                command = reader.ReadLine();
 
                                 if (command.ToLower().StartsWith("fire ") && CommandSyntaxCheck(command))
                                 {
@@ -346,7 +366,12 @@ namespace SinkMyBattleshipWPF.ViewModels
                 Logger.AddToLog("Misslyckades att öppna socket. Troligtvis upptagen. Restart!");
                 listener?.Stop();
             }
+            catch (IOException)
+            {
+                Logger.AddToLog("Something went wrong.. RESTART!");
+            }
         }
+
 
         private async Task StartServer(Player player)
         {
@@ -380,6 +405,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                         Logger.AddToLog($"Klient har anslutit sig {client.Client.RemoteEndPoint}!");
                         writer.WriteLine(AnswerCodes.Battleship.GetDescription());
                         Logger.AddToLog(AnswerCodes.Battleship.GetDescription());
+                        SetTimer();
 
                         var handshake = false;
                         var start = false;
