@@ -26,7 +26,9 @@ namespace SinkMyBattleshipWPF.Models
 
         public Board OceanBoard { get; set; } = new Board();
 
-        public Board TargetBoard { get; set; } = new Board();
+        public string Command { get; set; }
+
+        //public Board TargetBoard { get; set; } = new Board();
 
         public Player(string name, string address, int port, List<Boat> boats)
         {
@@ -82,6 +84,25 @@ namespace SinkMyBattleshipWPF.Models
             OceanBoard.Coor = coorde;
 
             return false;
+        }
+
+        public void GetFiredAtForUI()
+        {
+            var nr = 0;
+            var split = Command.Split(' ');
+            if (split[2].StartsWith("230"))
+            {
+                nr = 2;
+            }
+            else
+            {
+                nr = 1;
+            }
+
+            OceanBoard.Coor[split[1]] = nr;
+            var coord = new Dictionary<string, int>();
+            coord = OceanBoard.Coor;
+            OceanBoard.Coor = coord;
         }
 
         public string GetFiredAtMessage(string input)
@@ -210,7 +231,6 @@ namespace SinkMyBattleshipWPF.Models
                 _coor = new Dictionary<string, int>();
                 _coor = value;
                 OnPropertyChanged(nameof(Coor));
-                //_coor.PropertyChanged += (sender, args) => OnPropertyChanged(nameof(Coor));
 
             }
         }

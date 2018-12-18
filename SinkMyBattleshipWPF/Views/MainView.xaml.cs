@@ -31,7 +31,7 @@ namespace SinkMyBattleshipWPF.Views
 
             var vm = this.DataContext as MainViewModel;
 
-            DrawTarget();
+            //DrawTarget();
             //DrawOcean();
         }
 
@@ -70,26 +70,12 @@ namespace SinkMyBattleshipWPF.Views
                     var minus = 11;
                     newBtn.Name = "o_" + new Position("A1", 1).GetCoordinateFrom(i, j-minus);
                     newBtn.Content = new Position("A1", 1).GetCoordinateFrom(i, j - minus);
-                    //var binding = new Binding("Player.Name");
-                    ////var binding = new Binding("Player.Board['A1']");
-                    //binding.Source = newBtn;
-                    //newBtn.Background = Brushes.LightBlue;
                     newBtn.Opacity = 0.8;
 
                     Grid.SetRow(newBtn, i);
                     Grid.SetColumn(newBtn, j);
 
                     GridLayout.Children.Add(newBtn);
-
-                    //var data = Brushes.Red;
-                    //var binding = new Binding(newBtn.Name.ToString());
-                    //binding.Source = data;
-                    //newBtn.SetBinding(Button.BackgroundProperty, binding);
-
-
-                    //newBtn.SetBinding(ContentProperty, binding);
-                    //newBtn.Click += SendAction_Click;
-                    //newBtn.IsEnabled = false;
                 }
 
             }
@@ -105,10 +91,6 @@ namespace SinkMyBattleshipWPF.Views
             invokeProv.Invoke();
         }
 
-        private void TriggerGridColorChange_Click(object sender, RoutedEventArgs e)
-        {
-            var obj = sender as Button;
-            var split = TriggerLabel.Content.ToString().Split(' ');
-        }
+
     }
 }

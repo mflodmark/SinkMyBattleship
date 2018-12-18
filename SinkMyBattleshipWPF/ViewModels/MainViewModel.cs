@@ -97,7 +97,8 @@ namespace SinkMyBattleshipWPF.ViewModels
         public string TriggerLabel
         {
             get { return _triggerLabel; }
-            set {
+            set
+            {
                 _triggerLabel = value;
                 OnPropertyChanged(nameof(TriggerLabel));
                 //var peer = new ButtonAutomationPeer(TriggerGridColorChange);
@@ -206,13 +207,14 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     LastAction = "";
                                     Logger.AddToLog("Your turn!");
                                     break;
-                                }else if (command.Trim().ToLower() == "quit")
+                                }
+                                else if (command.Trim().ToLower() == "quit")
                                 {
                                     Logger.AddToLog("Server quit..");
 
                                     break;
                                 }
-                                else if(command.ToLower() == AnswerCodes.ConnectionClosed.GetDescription().ToLower())
+                                else if (command.ToLower() == AnswerCodes.ConnectionClosed.GetDescription().ToLower())
                                 {
                                     Logger.AddToLog(command);
                                 }
@@ -352,115 +354,164 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                 player.FiredAtOpponent = new List<string>();
 
-                using (var client = await listener.AcceptTcpClientAsync())
-                using (var networkStream = client.GetStream())
-                using (var reader = new StreamReader(networkStream, Encoding.UTF8))
-                using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
+                try
                 {
-                    Logger.AddToLog($"Klient har anslutit sig {client.Client.RemoteEndPoint}!");
-                    writer.WriteLine(AnswerCodes.Battleship.GetDescription());
-                    Logger.AddToLog(AnswerCodes.Battleship.GetDescription());
 
-                    var handshake = false;
-                    var start = false;
-                    var continuePlay = true;
-                    var errorCounterClient = 0;
-                    var errorCounterServer = 0;
 
-                    while (client.Connected && continuePlay)
+                    using (var client = await listener.AcceptTcpClientAsync())
+                    using (var networkStream = client.GetStream())
+                    using (var reader = new StreamReader(networkStream, Encoding.UTF8))
+                    using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
                     {
-                        var command = "";
+                        Logger.AddToLog($"Klient har anslutit sig {client.Client.RemoteEndPoint}!");
+                        writer.WriteLine(AnswerCodes.Battleship.GetDescription());
+                        Logger.AddToLog(AnswerCodes.Battleship.GetDescription());
 
-                        // handskake
-                        if (!handshake)
+                        var handshake = false;
+                        var start = false;
+                        var continuePlay = true;
+                        var errorCounterClient = 0;
+                        var errorCounterServer = 0;
+
+                        while (client.Connected && continuePlay)
                         {
-                            command = reader.ReadLine();
+                            var command = "";
 
-                            if (command.StartsWith("helo ", StringComparison.InvariantCultureIgnoreCase) || command.StartsWith("hello ", StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                handshake = true;
-                                Logger.AddToLog(command);
-                                writer.WriteLine($"220 {player.Name}");
-                                Logger.AddToLog($"220 {player.Name}");
-                                Opponent.Name = command.Split(' ')[1];
-                            }
-                            else if (command.ToUpper() == "QUIT")
-                            {
-                                break; // TODO: do some logging
-                            }
-                            else if (!CommandSyntaxCheck(command))
-                            {
-                                Logger.AddToLog(AnswerCodes.Syntax_Error.GetDescription());
-                            }
-                            else if (!CommandSequenceCheck(command, handshake, true))
-                            {
-                                Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
-                            }
-
-                        }
-
-                        // start game
-                        if (!start && handshake)
-                        {
-                            command = reader.ReadLine();
-
-                            if (command.ToUpper() == "START")
-                            {
-                                Logger.AddToLog(command);
-                                start = true;
-
-                                // logic for who starts the game
-                                var random = new Random();
-                                var number = random.Next(0, 2) + 1;
-                                player.Turn = number;
-                                Opponent.Turn = number == 1 ? 2 : 1;
-
-                                if (player.Turn == 1)
-                                {
-                                    writer.WriteLine(AnswerCodes.HostStarts.GetDescription());
-                                    Logger.AddToLog(AnswerCodes.HostStarts.GetDescription());
-                                }
-                                else
-                                {
-                                    writer.WriteLine(AnswerCodes.ClientStarts.GetDescription());
-                                    Logger.AddToLog(AnswerCodes.ClientStarts.GetDescription());
-                                }
-                            }
-                            else if (command.ToUpper() == "QUIT")
-                            {
-                                break; // TODO: do some logging
-                            }
-                            else if (!CommandSyntaxCheck(command))
-                            {
-                                Logger.AddToLog(AnswerCodes.Syntax_Error.GetDescription());
-                            }
-                            else if (!CommandSequenceCheck(command, handshake, start))
-                            {
-                                Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
-                            }
-                        }
-
-                        // Loop host vs client
-                        for (int i = 1; i < 3; i++)
-                        {
-                            // wait for correct action from client
-                            while (start && Opponent.Turn == i && continuePlay)
+                            // handskake
+                            if (!handshake)
                             {
                                 command = reader.ReadLine();
 
-                                if (command.ToUpper() == "QUIT")
+                                if (command == null)
                                 {
-                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
-                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
-                                    Logger.AddToLog("Opponent quit..");
                                     continuePlay = false;
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
                                     break;
                                 }
 
-                                if (command.Trim().ToUpper() == "HELP")
+                                if (command.StartsWith("helo ", StringComparison.InvariantCultureIgnoreCase) ||
+                                    command.StartsWith("hello ", StringComparison.InvariantCultureIgnoreCase))
                                 {
-                                    writer.WriteLine(
-@"***********************************
+                                    handshake = true;
+                                    Logger.AddToLog(command);
+                                    writer.WriteLine($"220 {player.Name}");
+                                    Logger.AddToLog($"220 {player.Name}");
+                                    Opponent.Name = command.Split(' ')[1];
+                                }
+                                else if (command.ToUpper() == "QUIT")
+                                {
+                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                    break;
+                                }
+                                else if (!CommandSyntaxCheck(command))
+                                {
+                                    writer.WriteLine(AnswerCodes.Syntax_Error.GetDescription());
+                                    errorCounterClient += 1;
+                                }
+                                else if (!CommandSequenceCheck(command, handshake, true))
+                                {
+                                    writer.WriteLine(AnswerCodes.Sequence_Error.GetDescription());
+                                    errorCounterClient += 1;
+                                }
+
+                                if (errorCounterClient > 3)
+                                {
+                                    continuePlay = false;
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                    break;
+                                }
+                            }
+
+                            // start game
+                            if (!start && handshake)
+                            {
+                                command = reader.ReadLine();
+
+                                if (command == null)
+                                {
+                                    continuePlay = false;
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                    break;
+                                }
+
+                                if (command.ToUpper() == "START")
+                                {
+                                    Logger.AddToLog(command);
+                                    start = true;
+
+                                    // logic for who starts the game
+                                    var random = new Random();
+                                    var number = random.Next(0, 2) + 1;
+                                    player.Turn = number;
+                                    Opponent.Turn = number == 1 ? 2 : 1;
+
+                                    if (player.Turn == 1)
+                                    {
+                                        writer.WriteLine(AnswerCodes.HostStarts.GetDescription());
+                                        Logger.AddToLog(AnswerCodes.HostStarts.GetDescription());
+                                    }
+                                    else
+                                    {
+                                        writer.WriteLine(AnswerCodes.ClientStarts.GetDescription());
+                                        Logger.AddToLog(AnswerCodes.ClientStarts.GetDescription());
+                                    }
+                                }
+                                else if (command.ToUpper() == "QUIT")
+                                {
+                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                    break;
+                                }
+                                else if (!CommandSyntaxCheck(command))
+                                {
+                                    writer.WriteLine(AnswerCodes.Syntax_Error.GetDescription());
+                                    errorCounterClient += 1;
+                                }
+                                else if (!CommandSequenceCheck(command, handshake, start))
+                                {
+                                    writer.WriteLine(AnswerCodes.Sequence_Error.GetDescription());
+                                    errorCounterClient += 1;
+                                }
+
+                                if (errorCounterClient > 3)
+                                {
+                                    continuePlay = false;
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                    break;
+                                }
+                            }
+
+                            // Loop host vs client
+                            for (int i = 1; i < 3; i++)
+                            {
+                                // wait for correct action from client
+                                while (start && Opponent.Turn == i && continuePlay)
+                                {
+                                    command = reader.ReadLine().Trim().ToUpper();
+
+                                    if (command == null)
+                                    {
+                                        continuePlay = false;
+                                        Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                        break;
+                                    }
+
+                                    if (command == "QUIT")
+                                    {
+                                        writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                        Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                        Logger.AddToLog("Opponent quit..");
+                                        continuePlay = false;
+                                        break;
+                                    }
+
+                                    if (command == "HELP")
+                                    {
+                                        writer.WriteLine(
+    @"***********************************
 Write QUIT to terminate connection.
 Write Fire <Coordinate> to fire. 
 Write QUIT to terminate connection.
@@ -479,173 +530,182 @@ If your opponent SUNK your Patrol Boat, write '255 <Message>'.
 
 If your opponent wins, write '260 <Message>'
 ************************************");
-                                    continue;
-                                }
-
-                                if (command.StartsWith("270") || command == null)
-                                {
-                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
-                                    continuePlay = false;
-                                    errorCounterClient = 0;
-                                    break;
-                                }
-
-                                if (command.StartsWith("260"))
-                                {
-                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
-                                    Logger.AddToLog(command);
-                                    continuePlay = false;
-                                    break;
-                                }
-
-                                if (command.StartsWith("23") || command.StartsWith("24") || command.StartsWith("25"))
-                                {
-                                    TriggerLabel += $" {command}";
-                                    Logger.AddToLog(command);
-                                    Logger.AddToLog("Waiting for opponents action..");
-                                    continue;
-                                }
-
-                                if (!CommandSyntaxCheck(command))
-                                {
-                                    errorCounterClient += 1;
-                                    writer.WriteLine(AnswerCodes.Syntax_Error.GetDescription());
-                                }
-                                else if (!CommandSequenceCheck(command, handshake, start))
-                                {
-                                    errorCounterClient += 1;
-                                    writer.WriteLine(AnswerCodes.Sequence_Error.GetDescription());
-                                }
-                                else if (!string.IsNullOrEmpty(command))
-                                {
-                                    if (command.ToLower().StartsWith("fire "))
-                                    {
-                                        // Game logic
-                                        TriggerLabel = command;
-
-                                        Logger.AddToLog($"Klient: {command}");
-                                        Opponent.FireAt(command);
-                                        player.GetFiredAt(command);
-                                        writer.WriteLine(player.GetFiredAtMessage(command));
-                                        if (player.GetFiredAtMessage(command) == AnswerCodes.YouWin.GetDescription())
-                                        {
-                                            Logger.AddToLog("You lost...");
-                                            continuePlay = false;
-                                        }
-                                        else
-                                        {
-                                            Logger.AddToLog("It's your turn!");
-                                        }
-                                        LastAction = "";
-                                        errorCounterClient = 0;
-                                        break;
+                                        continue;
                                     }
-                                    else
+
+                                    if (command == AnswerCodes.ConnectionClosed.GetDescription().ToUpper() ||
+                                        command == null)
                                     {
-                                        // Answer on a fired shot
-                                        Opponent.GetFiredAt(command);
-                                        writer.WriteLine(Opponent.GetFiredAtMessage(command));
-                                        Logger.AddToLog(Opponent.GetFiredAtMessage(command));
-                                        LastAction = "";
+                                        Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                        writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                        continuePlay = false;
                                         errorCounterClient = 0;
                                         break;
                                     }
 
-                                }
-
-                                if (errorCounterClient > 3)
-                                {
-                                    continuePlay = false;
-                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
-                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
-                                    break;
-                                }
-
-                            }
-
-                            // Wait for correct action from server
-                            while (start && player.Turn == i && continuePlay)
-                            {
-                                if (LastAction.ToUpper() == "QUIT")
-                                {
-                                    continuePlay = false;
-                                    break; // TODO: do some logging
-                                }
-
-                                if (LastAction.StartsWith("270"))
-                                {
-                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
-                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
-                                    continuePlay = false;
-                                    break;
-                                }
-
-                                if (LastAction == "RestartServer")
-                                {
-                                    continuePlay = false;
-                                    break;
-                                }
-
-                                if (!string.IsNullOrEmpty(LastAction))
-                                {
-                                    if (LastAction.ToLower().StartsWith("fire "))
+                                    if (command == AnswerCodes.ConnectionClosed.GetDescription().ToUpper())
                                     {
-                                        TriggerLabel = LastAction;
+                                        writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                        Logger.AddToLog(command);
+                                        continuePlay = false;
+                                        break;
+                                    }
 
-                                        if (!player.CheckFiredAt(LastAction))
+                                    if (command == AnswerCodes.YouHitMyBattleship.GetDescription().ToUpper() ||
+                                        command == AnswerCodes.YouHitMyCarrier.GetDescription().ToUpper() ||
+                                        command == AnswerCodes.YouHitMyDestroyer.GetDescription().ToUpper() ||
+                                        command == AnswerCodes.YouHitMyPatrolBpat.GetDescription().ToUpper() ||
+                                        command == AnswerCodes.YouHitMySubmarine.GetDescription().ToUpper() ||
+                                        command == AnswerCodes.Miss.GetDescription().ToUpper() ||
+                                        command == AnswerCodes.YouSunkMyBattleship.GetDescription().ToUpper() ||
+                                        command == AnswerCodes.YouSunkMyCarrier.GetDescription().ToUpper() ||
+                                        command == AnswerCodes.YouSunkMyDestroyer.GetDescription().ToUpper() ||
+                                        command == AnswerCodes.YouSunkMyPatrolBoat.GetDescription().ToUpper() ||
+                                        command == AnswerCodes.YouSunkMySubmarine.GetDescription().ToUpper())
+                                    {
+                                        Opponent.Command += command;
+                                        Logger.AddToLog(command);
+                                        Opponent.GetFiredAtForUI();
+                                        Logger.AddToLog("Waiting for opponents action..");
+                                        continue;
+                                    }
+
+                                    if (!CommandSyntaxCheck(command))
+                                    {
+                                        errorCounterClient += 1;
+                                        writer.WriteLine(AnswerCodes.Syntax_Error.GetDescription());
+                                    }
+                                    else if (!CommandSequenceCheck(command, handshake, start))
+                                    {
+                                        errorCounterClient += 1;
+                                        writer.WriteLine(AnswerCodes.Sequence_Error.GetDescription());
+                                    }
+                                    else if (!string.IsNullOrEmpty(command))
+                                    {
+                                        if (command.ToLower().StartsWith("fire "))
                                         {
-                                            writer.WriteLine(LastAction);
-                                            Logger.AddToLog(LastAction);
-
-                                            player.FireAt(LastAction);
-
-                                            Logger.AddToLog("Waiting for opponents response..");
+                                            // Game logic
+                                            Logger.AddToLog($"Klient: {command}");
+                                            Opponent.FireAt(command);
+                                            player.GetFiredAt(command);
+                                            writer.WriteLine(player.GetFiredAtMessage(command));
+                                            if (player.GetFiredAtMessage(command) == AnswerCodes.YouWin.GetDescription())
+                                            {
+                                                Logger.AddToLog("You lost...");
+                                                continuePlay = false;
+                                            }
+                                            else
+                                            {
+                                                Logger.AddToLog("It's your turn!");
+                                            }
                                             LastAction = "";
-                                            errorCounterServer = 0;
+                                            errorCounterClient = 0;
                                             break;
                                         }
                                         else
                                         {
-                                            Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
-                                            errorCounterServer += 1;
+                                            // Answer on a fired shot
+                                            //Opponent.GetFiredAt(command);
+                                            writer.WriteLine(Opponent.GetFiredAtMessage(command));
+                                            Logger.AddToLog(Opponent.GetFiredAtMessage(command));
+                                            LastAction = "";
+                                            errorCounterClient = 0;
+                                            break;
                                         }
 
                                     }
-                                    else if (!CommandSyntaxCheck(LastAction))
-                                    {
-                                        Logger.AddToLog(AnswerCodes.Syntax_Error.GetDescription());
-                                        errorCounterServer += 1;
-                                    }
-                                    else if (!CommandSequenceCheck(LastAction, handshake, start))
-                                    {
-                                        Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
-                                        errorCounterServer += 1;
-                                    }
 
-                                    LastAction = "";
-                                    if (errorCounterServer > 3)
+                                    if (errorCounterClient > 3)
                                     {
+                                        continuePlay = false;
                                         Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
                                         writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
                                         break;
                                     }
 
                                 }
-                                else
+
+                                // Wait for correct action from server
+                                while (start && player.Turn == i && continuePlay)
                                 {
-                                    Thread.Sleep(500);
+                                    if (LastAction.ToUpper() == AnswerCodes.ConnectionClosed.GetDescription().ToUpper())
+                                    {
+                                        writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                        Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                        continuePlay = false;
+                                        break;
+                                    }
+
+                                    if (LastAction == "RestartServer")
+                                    {
+                                        continuePlay = false;
+                                        break;
+                                    }
+
+                                    if (!string.IsNullOrEmpty(LastAction))
+                                    {
+                                        if (!CommandSyntaxCheck(LastAction))
+                                        {
+                                            Logger.AddToLog(AnswerCodes.Syntax_Error.GetDescription());
+                                            errorCounterServer += 1;
+                                        }
+                                        else if (!CommandSequenceCheck(LastAction, handshake, start))
+                                        {
+                                            Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
+                                            errorCounterServer += 1;
+                                        }
+                                        else if (LastAction.ToLower().StartsWith("fire "))
+                                        {
+                                            if (!player.CheckFiredAt(LastAction))
+                                            {
+                                                writer.WriteLine(LastAction);
+                                                Logger.AddToLog(LastAction);
+
+                                                player.FireAt(LastAction);
+                                                Opponent.Command = $"{LastAction} ";
+
+                                                Logger.AddToLog("Waiting for opponents response..");
+                                                LastAction = "";
+                                                errorCounterServer = 0;
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                Logger.AddToLog(AnswerCodes.Sequence_Error.GetDescription());
+                                                errorCounterServer += 1;
+                                            }
+
+                                        }
+
+                                        LastAction = "";
+                                        if (errorCounterServer > 3)
+                                        {
+                                            Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                            writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                            break;
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        Thread.Sleep(500);
+                                    }
                                 }
                             }
+
+
                         }
+                    }
+                    if (LastAction == "RestartServer")
+                    {
 
-
+                        Restart();
+                        break;
                     }
                 }
-                if (LastAction == "RestartServer")
+                catch (IOException)
                 {
-
-                    Restart();
-                    break;
+                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
                 }
             }
         }
