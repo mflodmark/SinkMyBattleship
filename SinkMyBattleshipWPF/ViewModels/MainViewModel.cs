@@ -31,13 +31,13 @@ namespace SinkMyBattleshipWPF.ViewModels
 
             if (player.Boats != null)
             {
-                //Boat1 = Player.Boats[0];
-                //Boat2 = Player.Boats[1];
-                //Boat3 = Player.Boats[2];
-                //Boat4 = Player.Boats[3];
-                //Boat5 = Player.Boats[4];
+                Boat1 = Player.Boats[0];
+                Boat2 = Player.Boats[1];
+                Boat3 = Player.Boats[2];
+                Boat4 = Player.Boats[3];
+                Boat5 = Player.Boats[4];
 
-                Boat5 = player.Boats[0];
+                //Boat5 = player.Boats[0];
 
                 foreach (var item in Player.Boats)
                 {
@@ -91,23 +91,6 @@ namespace SinkMyBattleshipWPF.ViewModels
         public Boat Boat5 { get; set; }
 
         public static Logger Logger { get; set; } = new Logger();
-
-        private string _triggerLabel;
-
-        public string TriggerLabel
-        {
-            get { return _triggerLabel; }
-            set
-            {
-                _triggerLabel = value;
-                OnPropertyChanged(nameof(TriggerLabel));
-                //var peer = new ButtonAutomationPeer(TriggerGridColorChange);
-                //var invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
-                //invokeProv.Invoke();
-            }
-        }
-
-        //public Button TriggerGridColorChange { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -533,7 +516,7 @@ If your opponent wins, write '260 <Message>'
                                         continue;
                                     }
 
-                                    if (command == AnswerCodes.ConnectionClosed.GetDescription().ToUpper() ||
+                                    if (command.StartsWith("270 ") ||
                                         command == null)
                                     {
                                         Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
@@ -543,30 +526,22 @@ If your opponent wins, write '260 <Message>'
                                         break;
                                     }
 
-                                    if (command == AnswerCodes.ConnectionClosed.GetDescription().ToUpper())
-                                    {
-                                        writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
-                                        Logger.AddToLog(command);
-                                        continuePlay = false;
-                                        break;
-                                    }
+                                    //if (command.StartsWith("270 "))
+                                    //{
+                                    //    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
+                                    //    Logger.AddToLog(command);
+                                    //    continuePlay = false;
+                                    //    errorCounterClient = 0;
+                                    //    break;
+                                    //}
 
-                                    if (command == AnswerCodes.YouHitMyBattleship.GetDescription().ToUpper() ||
-                                        command == AnswerCodes.YouHitMyCarrier.GetDescription().ToUpper() ||
-                                        command == AnswerCodes.YouHitMyDestroyer.GetDescription().ToUpper() ||
-                                        command == AnswerCodes.YouHitMyPatrolBpat.GetDescription().ToUpper() ||
-                                        command == AnswerCodes.YouHitMySubmarine.GetDescription().ToUpper() ||
-                                        command == AnswerCodes.Miss.GetDescription().ToUpper() ||
-                                        command == AnswerCodes.YouSunkMyBattleship.GetDescription().ToUpper() ||
-                                        command == AnswerCodes.YouSunkMyCarrier.GetDescription().ToUpper() ||
-                                        command == AnswerCodes.YouSunkMyDestroyer.GetDescription().ToUpper() ||
-                                        command == AnswerCodes.YouSunkMyPatrolBoat.GetDescription().ToUpper() ||
-                                        command == AnswerCodes.YouSunkMySubmarine.GetDescription().ToUpper())
+                                    if (command.StartsWith("230 ") || command.StartsWith("240 ") || command.StartsWith("250 "))
                                     {
                                         Opponent.Command += command;
-                                        Logger.AddToLog(command);
                                         Opponent.GetFiredAtForUI();
+                                        Logger.AddToLog(command);
                                         Logger.AddToLog("Waiting for opponents action..");
+                                        errorCounterClient = 0;
                                         continue;
                                     }
 
@@ -605,7 +580,6 @@ If your opponent wins, write '260 <Message>'
                                         else
                                         {
                                             // Answer on a fired shot
-                                            //Opponent.GetFiredAt(command);
                                             writer.WriteLine(Opponent.GetFiredAtMessage(command));
                                             Logger.AddToLog(Opponent.GetFiredAtMessage(command));
                                             LastAction = "";

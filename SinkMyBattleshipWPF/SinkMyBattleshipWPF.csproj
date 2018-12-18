@@ -99,6 +99,7 @@
     <Compile Include="Converters\FireConverter.cs" />
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Integration\TextBoxBehaviour.cs" />
+    <Compile Include="Models\Board.cs" />
     <Compile Include="Models\Boat.cs" />
     <Compile Include="Models\Logger.cs" />
     <Compile Include="Models\Player.cs" />

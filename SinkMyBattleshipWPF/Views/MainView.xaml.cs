@@ -1,19 +1,9 @@
 ﻿using SinkMyBattleshipWPF.Models;
 using SinkMyBattleshipWPF.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Automation.Provider;
 
 namespace SinkMyBattleshipWPF.Views
@@ -23,8 +13,6 @@ namespace SinkMyBattleshipWPF.Views
     /// </summary>
     public partial class MainView : Window
     {
-        //private readonly Player _player;
-
         public MainView()
         {
             InitializeComponent();
