@@ -713,7 +713,7 @@
             <Button Grid.Column="15" Grid.Row="10" Content="J4" Opacity="0.7"
                     Background="{Binding Player.OceanBoard.Coor, 
                 UpdateSourceTrigger=PropertyChanged, 
-                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=J10}">
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=J4}">
             </Button>
 
             <Button Grid.Column="16" Grid.Row="10" Content="J5" Opacity="0.7"

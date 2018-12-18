@@ -92,6 +92,8 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public static Logger Logger { get; set; } = new Logger();
 
+        public TcpClient Client { get; set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         static TcpListener listener;
@@ -115,11 +117,21 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         private async Task StartClient(Player player)
         {
+            // Reset boats status
+            foreach (var boat in player.Boats)
+            {
+                boat.Coordinates = boat.Coordinates.ToDictionary(x => x.Key, x => false);
+            }
+            player.ClearBoardUI();
+            Opponent.ClearBoardUI();
+
+            player.FiredAtOpponent = new List<string>();
+
             try
             {
 
-                using (var client = new TcpClient(player.Address, player.Port))
-                using (var networkStream = client.GetStream())
+                using (Client = new TcpClient(player.Address, player.Port))
+                using (var networkStream = Client.GetStream())
                 using (var reader = new StreamReader(networkStream, Encoding.UTF8))
                 using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
                 {
@@ -127,11 +139,11 @@ namespace SinkMyBattleshipWPF.ViewModels
                     LastAction = "";
                     var continuePlay = true;
 
-                    Logger.AddToLog($"Ansluten till {client.Client.RemoteEndPoint}");
+                    Logger.AddToLog($"Ansluten till {Client.Client.RemoteEndPoint}");
 
                     // Check battleship
-                    command = reader.ReadLine();
-                    if (!(command.ToLower() == AnswerCodes.Battleship.GetDescription().ToLower()))
+                    command = reader.ReadLine().Trim().ToLower();
+                    if (!(command == AnswerCodes.Battleship.GetDescription().ToLower()))
                     {
                         Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
                         continuePlay = false;
@@ -141,38 +153,47 @@ namespace SinkMyBattleshipWPF.ViewModels
                         Logger.AddToLog(command);
                     }
 
-                    writer.WriteLine($"HELO {player.Name}");
-                    Logger.AddToLog($"HELO {player.Name}");
-
-                    // Check handshake
-                    command = reader.ReadLine();
-                    if (!command.StartsWith("220 "))
+                    if (string.IsNullOrEmpty(player.Name))
                     {
+                        Logger.AddToLog("No name - Restart!");
                         continuePlay = false;
                     }
                     else
                     {
+                        writer.WriteLine($"HELO {player.Name}");
+                        Logger.AddToLog($"HELO {player.Name}");
+
+                        // Check handshake
+                        command = reader.ReadLine();
+                        if (!command.StartsWith("220 "))
+                        {
+                            continuePlay = false;
+                        }
+                        else
+                        {
+                            Logger.AddToLog(command);
+                        }
+                        //Check which player starts
+                        writer.WriteLine("START");
+                        Logger.AddToLog("START");
+
+                        command = reader.ReadLine();
+                        if (command.ToLower() == AnswerCodes.ClientStarts.GetDescription().ToLower())
+                        {
+                            player.Turn = 1;
+                            Opponent.Turn = 2;
+                        }
+                        else
+                        {
+                            player.Turn = 2;
+                            Opponent.Turn = 1;
+                        }
                         Logger.AddToLog(command);
                     }
 
-                    //Check which player starts
-                    writer.WriteLine("START");
-                    Logger.AddToLog("START");
 
-                    command = reader.ReadLine();
-                    if (command.ToLower() == AnswerCodes.ClientStarts.GetDescription().ToLower())
-                    {
-                        player.Turn = 1;
-                        Opponent.Turn = 2;
-                    }
-                    else
-                    {
-                        player.Turn = 2;
-                        Opponent.Turn = 1;
-                    }
-                    Logger.AddToLog(command);
 
-                    while (client.Connected && continuePlay)
+                    while (Client.Connected && continuePlay)
                     {
                         for (int i = 1; i < 3; i++)
                         {
@@ -187,6 +208,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     Logger.AddToLog(command);
                                     player.GetFiredAt(command);
                                     writer.WriteLine(player.GetFiredAtMessage(command));
+                                    Logger.AddToLog(player.GetFiredAtMessage(command));
                                     LastAction = "";
                                     Logger.AddToLog("Your turn!");
                                     break;
@@ -230,6 +252,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                         writer.WriteLine(LastAction);
                                         Logger.AddToLog(LastAction);
                                         player.FireAt(LastAction);
+                                        Opponent.Command = LastAction;
 
                                         Logger.AddToLog("Waiting for opponents response");
 
@@ -244,6 +267,8 @@ namespace SinkMyBattleshipWPF.ViewModels
                                         if (response.StartsWith("23") || response.StartsWith("24") || response.StartsWith("25"))
                                         {
                                             Logger.AddToLog(response);
+                                            Opponent.Command += $" {response}";
+                                            Opponent.GetFiredAtForUI();
                                         }
 
                                         if (response.ToLower() == AnswerCodes.ConnectionClosed.GetDescription().ToLower())
@@ -301,6 +326,10 @@ namespace SinkMyBattleshipWPF.ViewModels
                 Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
                 Logger.AddToLog("Error - Restart!");
                 listener?.Stop();
+            }
+            finally
+            {
+                Client.Close();
             }
         }
 
@@ -365,7 +394,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                             // handskake
                             if (!handshake)
                             {
-                                command = reader.ReadLine();
+                                command = reader.ReadLine().Trim().ToLower();
 
                                 if (command == null)
                                 {
@@ -383,7 +412,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     Logger.AddToLog($"220 {player.Name}");
                                     Opponent.Name = command.Split(' ')[1];
                                 }
-                                else if (command.ToUpper() == "QUIT")
+                                else if (command == "quit")
                                 {
                                     writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
                                     Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
@@ -412,7 +441,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                             // start game
                             if (!start && handshake)
                             {
-                                command = reader.ReadLine();
+                                command = reader.ReadLine().Trim().ToUpper();
 
                                 if (command == null)
                                 {
@@ -443,7 +472,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                         Logger.AddToLog(AnswerCodes.ClientStarts.GetDescription());
                                     }
                                 }
-                                else if (command.ToUpper() == "QUIT")
+                                else if (command == "QUIT")
                                 {
                                     writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
                                     Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
@@ -477,7 +506,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 {
                                     command = reader.ReadLine().Trim().ToUpper();
 
-                                    if (command == null)
+                                    if (string.IsNullOrEmpty(command))
                                     {
                                         continuePlay = false;
                                         Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
@@ -537,7 +566,7 @@ If your opponent wins, write '260 <Message>'
                                     //    break;
                                     //}
 
-                                    if (command.StartsWith("230 ") || command.StartsWith("240 ") || command.StartsWith("250 "))
+                                    if (command.StartsWith("230 ") || command.StartsWith("24") || command.StartsWith("25"))
                                     {
                                         Opponent.Command += command;
                                         Opponent.GetFiredAtForUI();
@@ -561,12 +590,20 @@ If your opponent wins, write '260 <Message>'
                                     {
                                         if (command.ToLower().StartsWith("fire "))
                                         {
+                                            if (Opponent.CheckFiredAt(command))
+                                            {
+                                                writer.WriteLine(AnswerCodes.Sequence_Error.GetDescription());
+                                                continue;
+                                            }
+
                                             // Game logic
                                             Logger.AddToLog($"Klient: {command}");
                                             Opponent.FireAt(command);
                                             player.GetFiredAt(command);
                                             writer.WriteLine(player.GetFiredAtMessage(command));
-                                            if (player.GetFiredAtMessage(command) == AnswerCodes.YouWin.GetDescription())
+                                            Logger.AddToLog(player.GetFiredAtMessage(command));
+
+                                            if (player.GetFiredAtMessage(command).StartsWith("260 "))
                                             {
                                                 Logger.AddToLog("You lost...");
                                                 continuePlay = false;
@@ -582,11 +619,11 @@ If your opponent wins, write '260 <Message>'
                                         else
                                         {
                                             // Answer on a fired shot
-                                            writer.WriteLine(Opponent.GetFiredAtMessage(command));
-                                            Logger.AddToLog(Opponent.GetFiredAtMessage(command));
-                                            LastAction = "";
-                                            errorCounterClient = 0;
-                                            break;
+                                            //writer.WriteLine(player.GetFiredAtMessage(command));
+                                            //Logger.AddToLog(player.GetFiredAtMessage(command));
+                                            //LastAction = "";
+                                            //errorCounterClient = 0;
+                                            //break;
                                         }
 
                                     }
@@ -758,6 +795,10 @@ If your opponent wins, write '260 <Message>'
         public void RestartServer()
         {
             //LastAction = "RestartServer";
+            if (Client != null)
+            {
+                Client.Close();
+            }
             listener?.Stop();
             Logger.ClearLog();
             var manager = new WindowManager();
