@@ -60,12 +60,6 @@ namespace SinkMyBattleshipWPF.Models
         {
             var arr = input.Split(' ');
             var input1 = arr[1].ToUpper();
-
-            OceanBoard.Coor[input1] = 1;
-            var coord = new Dictionary<string, int>();
-            coord = OceanBoard.Coor;
-            OceanBoard.Coor = coord;
-
             foreach (var boat in Boats)
             {
                 foreach (var coor in boat.Coordinates)
@@ -73,10 +67,19 @@ namespace SinkMyBattleshipWPF.Models
                     if (coor.Key == input1)
                     {
                         boat.Coordinates[coor.Key] = true;
+                        OceanBoard.Coor[input1] = 1;
+                        var coord = new Dictionary<string, int>();
+                        coord = OceanBoard.Coor;
+                        OceanBoard.Coor = coord;
                         return true;
                     }
                 }
             }
+
+            OceanBoard.Coor[input1] = 2;
+            var coorde = new Dictionary<string, int>();
+            coorde = OceanBoard.Coor;
+            OceanBoard.Coor = coorde;
 
             return false;
         }

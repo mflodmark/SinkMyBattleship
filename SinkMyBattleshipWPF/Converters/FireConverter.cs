@@ -39,9 +39,9 @@ namespace SinkMyBattleshipWPF.Converters
                 case 0:
                     return Brushes.LightBlue;
                 case 1:
-                    return Brushes.White;
-                case 2:
                     return Brushes.Red;
+                case 2:
+                    return Brushes.White;
                 default:
                     return Brushes.LightBlue;
             }
