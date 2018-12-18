@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SinkMyBattleshipWPF.Views"
         xmlns:src="clr-namespace:SinkMyBattleshipWPF.Integration"
+        xmlns:l="clr-namespace:SinkMyBattleshipWPF.Converters"
         mc:Ignorable="d"
         Title="MainView" Height="600" Width="800" Background="LightGray" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <l:FireConverter x:Key="ConvertBackgroundColor" />
+    </Window.Resources>
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
@@ -100,7 +104,9 @@
             <Label Grid.Column="1" Grid.Row="12" Grid.ColumnSpan="2" Content="Action:"></Label>
             <TextBox x:Name="Action" Grid.Column="3" Grid.Row="12" Grid.ColumnSpan="5"></TextBox>
             <Button x:Name="SendAction" Grid.Column="8" Grid.Row="12" Content="Send"></Button>
-            
+
+            <Button x:Name="TriggerGridColorChange" Grid.Column="16" Grid.Row="12" Click="TriggerGridColorChange_Click"></Button>
+            <Label x:Name="TriggerLabel"></Label>
             <Button x:Name="RestartServer" Grid.Column="12" Grid.Row="12" Grid.ColumnSpan="3" Content="Restart Server"></Button>
 
             <ScrollViewer Grid.Column="1" Grid.ColumnSpan="15" Grid.Row="13" Grid.RowSpan="10" Background="White">
@@ -137,6 +143,66 @@
                     Grid.Column="{Binding Boat5.Position.Column}" 
                     Grid.RowSpan="{Binding Boat5.Position.RowSpan}" 
                     Background="Yellow" Opacity="0.5"/>
+
+            <Button Grid.Column="12" Grid.Row="1" Content="A1"
+                    Background="{Binding Player.OceanBoard.Coor, 
+                UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=A1}">
+            </Button>
+
+            <Button Grid.Column="13" Grid.Row="1" Content="A2"
+                    Background="{Binding Player.OceanBoard.Coor, 
+                UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=A2}">
+            </Button>
+
+            <Button Grid.Column="14" Grid.Row="1" Content="A3"
+                    Background="{Binding Player.OceanBoard.Coor, 
+                UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=A3}">
+            </Button>
+
+            <Button Grid.Column="15" Grid.Row="1" Content="A4"
+                    Background="{Binding Player.OceanBoard.Coor, 
+                UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=A4}">
+            </Button>
+
+            <Button Grid.Column="16" Grid.Row="1" Content="A5"
+                    Background="{Binding Player.OceanBoard.Coor, 
+                UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=A5}">
+            </Button>
+
+            <Button Grid.Column="17" Grid.Row="1" Content="A6"
+                    Background="{Binding Player.OceanBoard.Coor, 
+                UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=A6}">
+            </Button>
+
+            <Button Grid.Column="18" Grid.Row="1" Content="A7"
+                    Background="{Binding Player.OceanBoard.Coor, 
+                UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=A7}">
+            </Button>
+
+            <Button Grid.Column="19" Grid.Row="1" Content="A8"
+                    Background="{Binding Player.OceanBoard.Coor, 
+                UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=A8}">
+            </Button>
+
+            <Button Grid.Column="20" Grid.Row="1" Content="A9"
+                    Background="{Binding Player.OceanBoard.Coor, 
+                UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=A9}">
+            </Button>
+
+            <Button Grid.Column="21" Grid.Row="1" Content="A10"
+                    Background="{Binding Player.OceanBoard.Coor, 
+                UpdateSourceTrigger=PropertyChanged, 
+                Converter={StaticResource ConvertBackgroundColor}, ConverterParameter=A10}">
+            </Button>
         </Grid>
     </DockPanel>
 </Window>

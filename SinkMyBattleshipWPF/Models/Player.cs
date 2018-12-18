@@ -2,9 +2,11 @@
 using SinkMyBattleshipWPF.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace SinkMyBattleshipWPF.Models
 {
@@ -22,7 +24,9 @@ namespace SinkMyBattleshipWPF.Models
 
         public List<string> FiredAtOpponent { get; set; } = new List<string>();
 
-        public Board Board { get; set; }
+        public Board OceanBoard { get; set; } = new Board();
+
+        public Board TargetBoard { get; set; } = new Board();
 
         public Player(string name, string address, int port, List<Boat> boats)
         {
@@ -56,6 +60,11 @@ namespace SinkMyBattleshipWPF.Models
         {
             var arr = input.Split(' ');
             var input1 = arr[1].ToUpper();
+
+            OceanBoard.Coor[input1] = 1;
+            var coord = new Dictionary<string, int>();
+            coord = OceanBoard.Coor;
+            OceanBoard.Coor = coord;
 
             foreach (var boat in Boats)
             {
@@ -171,10 +180,12 @@ namespace SinkMyBattleshipWPF.Models
 
     }
 
-    public class Board
+    public class Board : INotifyPropertyChanged
     {
         public Board()
         {
+            Coor = new Dictionary<string, int>();
+
             // i = row, j = column
             for (int i = 1; i <= 10; i++)
             {
@@ -187,12 +198,59 @@ namespace SinkMyBattleshipWPF.Models
         }
 
         // 0 == not fired at, 1= hit, 2 = miss
-        public Dictionary<string, int> Coor { get; set; } = new Dictionary<string, int>();
+        private Dictionary<string, int> _coor;
+
+        public Dictionary<string, int> Coor
+        {
+            get { return _coor; }
+            set {
+                _coor = new Dictionary<string, int>();
+                _coor = value;
+                OnPropertyChanged(nameof(Coor));
+                //_coor.PropertyChanged += (sender, args) => OnPropertyChanged(nameof(Coor));
+
+            }
+        }
+
+
+        //private SolidColorBrush _A1;
+
+        //public SolidColorBrush A1
+        //{
+        //    get { return _A1; }
+        //    set
+        //    {
+        //        switch (Coor["A1"])
+        //        {
+        //            case 0:
+        //                _A1 = Brushes.LightBlue;
+        //                break;
+        //            case 1:
+        //                _A1 = Brushes.Red;
+        //                break;
+        //            case 2:
+        //                _A1 = Brushes.White;
+        //                break;
+        //            default:
+        //                break;
+        //        }
+
+        //        OnPropertyChanged(nameof(A1));
+        //    }
+        //}
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
-    public static class Game
-    {
-        public static Player Player { get; set; }
+    //public static class Game
+    //{
+    //    public static Player Player { get; set; }
 
-    }
+    //}
 }

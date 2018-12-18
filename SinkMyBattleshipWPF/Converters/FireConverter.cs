@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SinkMyBattleshipWPF.Models;
+using SinkMyBattleshipWPF.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -30,9 +32,21 @@ namespace SinkMyBattleshipWPF.Converters
         //}
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var text = (string)value;
+            var vm = (Dictionary<string, int>)value;
 
-            throw new NotImplementedException();
+            switch (vm[parameter.ToString()])
+            {
+                case 0:
+                    return Brushes.LightBlue;
+                case 1:
+                    return Brushes.White;
+                case 2:
+                    return Brushes.Red;
+                default:
+                    return Brushes.LightBlue;
+            }
+
+            //throw new NotImplementedException();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

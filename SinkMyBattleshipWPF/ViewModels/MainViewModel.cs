@@ -15,6 +15,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Caliburn.Micro;
 using System.Windows;
+using System.Windows.Automation.Peers;
+using System.Windows.Automation.Provider;
 
 namespace SinkMyBattleshipWPF.ViewModels
 {
@@ -24,23 +26,18 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         public MainViewModel(Player player)
         {
-            Game.Player = player;
-
             Player = player;
             Opponent = new Player(null, null, 0, new List<Boat>());
-            //Opponent.Boats.Add(new Boat("Carrier", new Dictionary<string, bool>() { { "A1", false }, { "A2", false }, { "A3", false }, { "A4", false }, { "A5", false } }));
-            //Opponent.Boats.Add(new Boat("Battleship", new Dictionary<string, bool>() { { "B1", false }, { "B2", false }, { "B3", false }, { "B4", false }, }));
-            //Opponent.Boats.Add(new Boat("Destroyer", new Dictionary<string, bool>() { { "C1", false }, { "C2", false }, { "C3", false } }));
-            //Opponent.Boats.Add(new Boat("Submarine", new Dictionary<string, bool>() { { "D1", false }, { "D2", false }, { "D3", false } }));
-            //Opponent.Boats.Add(new Boat("Patrol Boat", new Dictionary<string, bool>() { { "E1", false }, { "E2", false } }));
 
             if (player.Boats != null)
             {
-                Boat1 = Player.Boats[0];
-                Boat2 = Player.Boats[1];
-                Boat3 = Player.Boats[2];
-                Boat4 = Player.Boats[3];
-                Boat5 = Player.Boats[4];
+                //Boat1 = Player.Boats[0];
+                //Boat2 = Player.Boats[1];
+                //Boat3 = Player.Boats[2];
+                //Boat4 = Player.Boats[3];
+                //Boat5 = Player.Boats[4];
+
+                Boat5 = player.Boats[0];
 
                 foreach (var item in Player.Boats)
                 {
@@ -93,9 +90,23 @@ namespace SinkMyBattleshipWPF.ViewModels
         public Boat Boat4 { get; set; }
         public Boat Boat5 { get; set; }
 
-        //public bool ContinuePlayServer { get; set; } = true;
-
         public static Logger Logger { get; set; } = new Logger();
+
+        private string _triggerLabel;
+
+        public string TriggerLabel
+        {
+            get { return _triggerLabel; }
+            set {
+                _triggerLabel = value;
+                OnPropertyChanged(nameof(TriggerLabel));
+                //var peer = new ButtonAutomationPeer(TriggerGridColorChange);
+                //var invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                //invokeProv.Invoke();
+            }
+        }
+
+        //public Button TriggerGridColorChange { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -120,164 +131,191 @@ namespace SinkMyBattleshipWPF.ViewModels
 
         private async Task StartClient(Player player)
         {
-            using (var client = new TcpClient(player.Address, player.Port))
-            using (var networkStream = client.GetStream())
-            using (var reader = new StreamReader(networkStream, Encoding.UTF8))
-            using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
+            try
             {
-                var command = "";
-                LastAction = "";
-                var continuePlay = true;
 
-                Logger.AddToLog($"Ansluten till {client.Client.RemoteEndPoint}");
+                using (var client = new TcpClient(player.Address, player.Port))
+                using (var networkStream = client.GetStream())
+                using (var reader = new StreamReader(networkStream, Encoding.UTF8))
+                using (var writer = new StreamWriter(networkStream, Encoding.UTF8) { AutoFlush = true })
+                {
+                    var command = "";
+                    LastAction = "";
+                    var continuePlay = true;
 
-                // Check battleship
-                command = reader.ReadLine();
-                if (!(command.ToLower() == AnswerCodes.Battleship.GetDescription().ToLower()))
-                {
-                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
-                    continuePlay = false;
-                }
-                else
-                {
-                    Logger.AddToLog(command);
-                }
+                    Logger.AddToLog($"Ansluten till {client.Client.RemoteEndPoint}");
 
-                writer.WriteLine($"HELO {player.Name}");
-                Logger.AddToLog($"HELO {player.Name}");
-
-                // Check handshake
-                command = reader.ReadLine();
-                if (!command.StartsWith("220 "))
-                {
-                    continuePlay = false;
-                }
-                else
-                {
-                    Logger.AddToLog(command);
-                }
-
-                //Check which player starts
-                writer.WriteLine("START");
-                Logger.AddToLog("START");
-
-                command = reader.ReadLine();
-                if (command.ToLower() == AnswerCodes.ClientStarts.GetDescription().ToLower())
-                {
-                    player.Turn = 1;
-                    Opponent.Turn = 2;
-                }
-                else
-                {
-                    player.Turn = 2;
-                    Opponent.Turn = 1;
-                }
-                Logger.AddToLog(command);
-
-                while (client.Connected && continuePlay)
-                {
-                    for (int i = 1; i < 3; i++)
+                    // Check battleship
+                    command = reader.ReadLine();
+                    if (!(command.ToLower() == AnswerCodes.Battleship.GetDescription().ToLower()))
                     {
-                        // Server command - game logic
-                        while (Opponent.Turn == i && continuePlay)
+                        Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                        continuePlay = false;
+                    }
+                    else
+                    {
+                        Logger.AddToLog(command);
+                    }
+
+                    writer.WriteLine($"HELO {player.Name}");
+                    Logger.AddToLog($"HELO {player.Name}");
+
+                    // Check handshake
+                    command = reader.ReadLine();
+                    if (!command.StartsWith("220 "))
+                    {
+                        continuePlay = false;
+                    }
+                    else
+                    {
+                        Logger.AddToLog(command);
+                    }
+
+                    //Check which player starts
+                    writer.WriteLine("START");
+                    Logger.AddToLog("START");
+
+                    command = reader.ReadLine();
+                    if (command.ToLower() == AnswerCodes.ClientStarts.GetDescription().ToLower())
+                    {
+                        player.Turn = 1;
+                        Opponent.Turn = 2;
+                    }
+                    else
+                    {
+                        player.Turn = 2;
+                        Opponent.Turn = 1;
+                    }
+                    Logger.AddToLog(command);
+
+                    while (client.Connected && continuePlay)
+                    {
+                        for (int i = 1; i < 3; i++)
                         {
-                            command = await reader.ReadLineAsync();
-                            Logger.AddToLog($"Server: {command}");
-
-                            if (command.ToLower().StartsWith("fire "))
+                            // Server command - game logic
+                            while (Opponent.Turn == i && continuePlay)
                             {
-                                // Game logic
-                                Logger.AddToLog(command);
-                                player.GetFiredAt(command);
-                                writer.WriteLine(player.GetFiredAtMessage(command));
-                                LastAction = "";
-                                break;
+                                command = await reader.ReadLineAsync();
+
+                                if (command.ToLower().StartsWith("fire ") && CommandSyntaxCheck(command))
+                                {
+                                    // Game logic
+                                    Logger.AddToLog(command);
+                                    player.GetFiredAt(command);
+                                    writer.WriteLine(player.GetFiredAtMessage(command));
+                                    LastAction = "";
+                                    Logger.AddToLog("Your turn!");
+                                    break;
+                                }else if (command.Trim().ToLower() == "quit")
+                                {
+                                    Logger.AddToLog("Server quit..");
+
+                                    break;
+                                }
+                                else if(command.ToLower() == AnswerCodes.ConnectionClosed.GetDescription().ToLower())
+                                {
+                                    Logger.AddToLog(command);
+                                }
+                                else
+                                {
+                                    writer.WriteLine(AnswerCodes.Sequence_Error.GetDescription());
+                                }
+
+
+
                             }
 
-                            if (command.Trim().ToLower() == "quit")
+
+                            // Client command
+                            while (player.Turn == i && continuePlay)
                             {
-                                Logger.AddToLog("Server quit..");
 
-                                break;
-                            }
-
-
-
-                        }
-
-
-                        // Client command
-                        while (player.Turn == i && continuePlay)
-                        {
-                            Logger.AddToLog("Your turn!");
-
-                            if (LastAction.ToUpper() == "QUIT")
-                            {
-                                writer.WriteLine(LastAction);
-                                Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
-                                continuePlay = false;
-                                break; 
-                            }
-
-                            if (!string.IsNullOrEmpty(LastAction))
-                            {
-                                if (LastAction.ToLower().StartsWith("fire "))
+                                if (LastAction.ToUpper() == "QUIT")
                                 {
                                     writer.WriteLine(LastAction);
-                                    Logger.AddToLog(LastAction);
-                                    player.FireAt(LastAction);
-
-                                    Logger.AddToLog("Waiting for opponents response");
-
-                                    var response = reader.ReadLine();
-                                    if (response.StartsWith("5"))
-                                    {
-                                        Logger.AddToLog(response);
-                                        LastAction = "";
-                                        continue;
-                                    }
-
-                                    if (response.StartsWith("23") || response.StartsWith("24") || response.StartsWith("25"))
-                                    {
-                                        
-                                    }
-
-                                    if (response.ToLower() == AnswerCodes.ConnectionClosed.GetDescription().ToLower())
-                                    {
-                                        Logger.AddToLog(response);
-                                        continuePlay = false;
-                                        break;
-                                    }
-
-                                    if (response.ToLower() == AnswerCodes.YouWin.GetDescription().ToLower())
-                                    {
-                                        Logger.AddToLog(response);
-                                        continuePlay = false;
-                                        break;
-                                    }
-
-                                    Logger.AddToLog("Waiting for opponents action");
-                                    LastAction = "";
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                    continuePlay = false;
                                     break;
                                 }
 
-                                LastAction = "";
+                                if (!string.IsNullOrEmpty(LastAction))
+                                {
+                                    if (LastAction.ToLower().StartsWith("fire "))
+                                    {
+                                        writer.WriteLine(LastAction);
+                                        Logger.AddToLog(LastAction);
+                                        player.FireAt(LastAction);
 
+                                        Logger.AddToLog("Waiting for opponents response");
+
+                                        var response = reader.ReadLine();
+                                        if (response.StartsWith("5"))
+                                        {
+                                            Logger.AddToLog(response);
+                                            LastAction = "";
+                                            continue;
+                                        }
+
+                                        if (response.StartsWith("23") || response.StartsWith("24") || response.StartsWith("25"))
+                                        {
+                                            Logger.AddToLog(response);
+                                        }
+
+                                        if (response.ToLower() == AnswerCodes.ConnectionClosed.GetDescription().ToLower())
+                                        {
+                                            Logger.AddToLog(response);
+                                            continuePlay = false;
+                                            break;
+                                        }
+
+                                        if (response.ToLower() == AnswerCodes.YouWin.GetDescription().ToLower())
+                                        {
+                                            Logger.AddToLog(response);
+                                            continuePlay = false;
+                                            break;
+                                        }
+
+                                        Logger.AddToLog("Waiting for opponents action");
+                                        LastAction = "";
+                                        break;
+                                    }
+
+                                    LastAction = "";
+
+                                }
+                                else
+                                {
+                                    Thread.Sleep(500);
+                                }
                             }
-                            else
-                            {
-                                Thread.Sleep(500);
-                            }
+
+                            //Logger.AddToLog("Waiting for opponents action..");
+
                         }
 
-                        //Logger.AddToLog("Waiting for opponents action..");
-
-                    }
 
 
+                    };
 
-                };
-
+                }
+            }
+            catch (SocketException e)
+            {
+                Logger.AddToLog(e.Message);
+                Logger.AddToLog("Error - Restart!");
+            }
+            catch (IOException)
+            {
+                //Logger.AddToLog(e.Message);
+                Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                Logger.AddToLog("Error - Restart!");
+                listener?.Stop();
+            }
+            catch (Exception)
+            {
+                Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                Logger.AddToLog("Error - Restart!");
+                listener?.Stop();
             }
         }
 
@@ -304,8 +342,15 @@ namespace SinkMyBattleshipWPF.ViewModels
 
             while (true)
             {
-                Logger.AddToLog("Väntar på att någon ska ansluta sig...");
+                Logger.AddToLog("Waiting for someone to connect...");
 
+                // Reset boats status
+                foreach (var boat in player.Boats)
+                {
+                    boat.Coordinates = boat.Coordinates.ToDictionary(x => x.Key, x => false);
+                }
+
+                player.FiredAtOpponent = new List<string>();
 
                 using (var client = await listener.AcceptTcpClientAsync())
                 using (var networkStream = client.GetStream())
@@ -331,7 +376,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                         {
                             command = reader.ReadLine();
 
-                            if (command.StartsWith("helo ", StringComparison.InvariantCultureIgnoreCase))
+                            if (command.StartsWith("helo ", StringComparison.InvariantCultureIgnoreCase) || command.StartsWith("hello ", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 handshake = true;
                                 Logger.AddToLog(command);
@@ -409,7 +454,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
                                     Logger.AddToLog("Opponent quit..");
                                     continuePlay = false;
-                                    break; 
+                                    break;
                                 }
 
                                 if (command.Trim().ToUpper() == "HELP")
@@ -434,6 +479,7 @@ If your opponent SUNK your Patrol Boat, write '255 <Message>'.
 
 If your opponent wins, write '260 <Message>'
 ************************************");
+                                    continue;
                                 }
 
                                 if (command.StartsWith("270") || command == null)
@@ -446,7 +492,7 @@ If your opponent wins, write '260 <Message>'
 
                                 if (command.StartsWith("260"))
                                 {
-                                    writer.WriteLine(command);
+                                    writer.WriteLine(AnswerCodes.ConnectionClosed.GetDescription());
                                     Logger.AddToLog(command);
                                     continuePlay = false;
                                     break;
@@ -454,6 +500,7 @@ If your opponent wins, write '260 <Message>'
 
                                 if (command.StartsWith("23") || command.StartsWith("24") || command.StartsWith("25"))
                                 {
+                                    TriggerLabel += $" {command}";
                                     Logger.AddToLog(command);
                                     Logger.AddToLog("Waiting for opponents action..");
                                     continue;
@@ -474,6 +521,8 @@ If your opponent wins, write '260 <Message>'
                                     if (command.ToLower().StartsWith("fire "))
                                     {
                                         // Game logic
+                                        TriggerLabel = command;
+
                                         Logger.AddToLog($"Klient: {command}");
                                         Opponent.FireAt(command);
                                         player.GetFiredAt(command);
@@ -541,6 +590,7 @@ If your opponent wins, write '260 <Message>'
                                 {
                                     if (LastAction.ToLower().StartsWith("fire "))
                                     {
+                                        TriggerLabel = LastAction;
 
                                         if (!player.CheckFiredAt(LastAction))
                                         {

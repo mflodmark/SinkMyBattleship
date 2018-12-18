@@ -12,8 +12,11 @@
             </ResourceDictionary.MergedDictionaries>
 
             <Style x:Key="GridButton" TargetType="Button">
-                <Setter Property="Background" Value="LightBlue"></Setter>
-                <Setter Property="Foreground" Value="White"></Setter>
+                <!--<Style.Triggers>
+                    <Trigger ></Trigger>
+                </Style.Triggers>-->
+                <!--<Setter Property="Background" Value="LightBlue"></Setter>
+                <Setter Property="Foreground" Value="White"></Setter>-->
             </Style>
 
 

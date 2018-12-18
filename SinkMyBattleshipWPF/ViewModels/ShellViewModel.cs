@@ -23,11 +23,13 @@ namespace SinkMyBattleshipWPF.ViewModels
             //Boats.Add(new Boat("Submarine", new Dictionary<string, bool>() {{ "D1", false }, {"D2", false}, {"D3", false}}));
             Boats.Add(new Boat("Patrol Boat", new Dictionary<string, bool>() {{ "E1", false }, {"E2", false}}));
 
-            Boat1 = Boats[0];
-            Boat2= Boats[1];
-            Boat3= Boats[2];
-            Boat4= Boats[3];
-            Boat5= Boats[4];
+            //Boat1 = Boats[0];
+            //Boat2= Boats[1];
+            //Boat3= Boats[2];
+            //Boat4= Boats[3];
+            //Boat5= Boats[4];
+
+            Boat5 = Boats[0];
 
         }
 

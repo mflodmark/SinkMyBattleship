@@ -29,8 +29,10 @@ namespace SinkMyBattleshipWPF.Views
         {
             InitializeComponent();
 
+            var vm = this.DataContext as MainViewModel;
+
             DrawTarget();
-            DrawOcean();
+            //DrawOcean();
         }
 
         private void DrawTarget()
@@ -71,18 +73,23 @@ namespace SinkMyBattleshipWPF.Views
                     //var binding = new Binding("Player.Name");
                     ////var binding = new Binding("Player.Board['A1']");
                     //binding.Source = newBtn;
-
-
-                    //newBtn.SetBinding(ContentProperty, binding);
-                    newBtn.Background = Brushes.LightBlue;
-                    //newBtn.Click += SendAction_Click;
-                    //newBtn.IsEnabled = false;
+                    //newBtn.Background = Brushes.LightBlue;
                     newBtn.Opacity = 0.8;
 
                     Grid.SetRow(newBtn, i);
                     Grid.SetColumn(newBtn, j);
 
                     GridLayout.Children.Add(newBtn);
+
+                    //var data = Brushes.Red;
+                    //var binding = new Binding(newBtn.Name.ToString());
+                    //binding.Source = data;
+                    //newBtn.SetBinding(Button.BackgroundProperty, binding);
+
+
+                    //newBtn.SetBinding(ContentProperty, binding);
+                    //newBtn.Click += SendAction_Click;
+                    //newBtn.IsEnabled = false;
                 }
 
             }
@@ -91,13 +98,17 @@ namespace SinkMyBattleshipWPF.Views
         private void SendAction_Click(object sender, RoutedEventArgs e)
         {
             var obj = sender as Button;
-            obj.Background = Brushes.White;
+            //obj.Background = Brushes.White;
             Action.Text = $"FIRE {obj.Content}";
             var peer = new ButtonAutomationPeer(SendAction);
             var invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
             invokeProv.Invoke();
         }
 
-        
+        private void TriggerGridColorChange_Click(object sender, RoutedEventArgs e)
+        {
+            var obj = sender as Button;
+            var split = TriggerLabel.Content.ToString().Split(' ');
+        }
     }
 }
