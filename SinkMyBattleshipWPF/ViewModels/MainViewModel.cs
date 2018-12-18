@@ -161,55 +161,80 @@ namespace SinkMyBattleshipWPF.ViewModels
 
                     Logger.AddToLog($"Ansluten till {Client.Client.RemoteEndPoint}");
 
-                    // Check battleship
-                    command = reader.ReadLine().Trim().ToLower();
-                    if (!(command == AnswerCodes.Battleship.GetDescription().ToLower()))
+                    command = reader.ReadLine();
+
+                    if (command == null)
                     {
+                        continuePlay = false;
                         Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
-                        continuePlay = false;
-                    }
-                    else
-                    {
-                        Logger.AddToLog(command);
                     }
 
-                    if (string.IsNullOrEmpty(player.Name))
+                    // Check battleship
+                    if (!string.IsNullOrEmpty(command))
                     {
-                        Logger.AddToLog("No name - Restart!");
-                        continuePlay = false;
-                    }
-                    else
-                    {
-                        writer.WriteLine($"HELO {player.Name}");
-                        Logger.AddToLog($"HELO {player.Name}");
-
-                        // Check handshake
-                        command = reader.ReadLine();
-                        if (!command.StartsWith("220 "))
+                        if (!(command.StartsWith("210 ")))
                         {
+                            Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
                             continuePlay = false;
                         }
                         else
                         {
                             Logger.AddToLog(command);
                         }
-                        //Check which player starts
-                        writer.WriteLine("START");
-                        Logger.AddToLog("START");
 
-                        command = reader.ReadLine();
-                        if (command.ToLower() == AnswerCodes.ClientStarts.GetDescription().ToLower())
+                        if (string.IsNullOrEmpty(player.Name))
                         {
-                            player.Turn = 1;
-                            Opponent.Turn = 2;
+                            Logger.AddToLog("No name - Restart!");
+                            continuePlay = false;
                         }
                         else
                         {
-                            player.Turn = 2;
-                            Opponent.Turn = 1;
+                            writer.WriteLine($"HELO {player.Name}");
+                            Logger.AddToLog($"HELO {player.Name}");
+
+                            // Check handshake
+                            command = reader.ReadLine();
+
+                            if (command == null)
+                            {
+                                continuePlay = false;
+                                Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                            }
+
+                            if (!command.StartsWith("220 "))
+                            {
+                                continuePlay = false;
+                            }
+                            else
+                            {
+                                Logger.AddToLog(command);
+                            }
+                            //Check which player starts
+                            writer.WriteLine("START");
+                            Logger.AddToLog("START");
+
+                            command = reader.ReadLine();
+
+                            if (command == null)
+                            {
+                                continuePlay = false;
+                                Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                            }
+
+                            if (command.ToLower() == AnswerCodes.ClientStarts.GetDescription().ToLower())
+                            {
+                                player.Turn = 1;
+                                Opponent.Turn = 2;
+                            }
+                            else
+                            {
+                                player.Turn = 2;
+                                Opponent.Turn = 1;
+                            }
+                            Logger.AddToLog(command);
                         }
-                        Logger.AddToLog(command);
                     }
+
 
 
 
@@ -221,6 +246,13 @@ namespace SinkMyBattleshipWPF.ViewModels
                             while (Opponent.Turn == i && continuePlay)
                             {
                                 command = reader.ReadLine();
+
+                                if (command == null)
+                                {
+                                    continuePlay = false;
+                                    Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                    break;
+                                }
 
                                 if (command.ToLower().StartsWith("fire ") && CommandSyntaxCheck(command))
                                 {
@@ -277,6 +309,13 @@ namespace SinkMyBattleshipWPF.ViewModels
                                         Logger.AddToLog("Waiting for opponents response");
 
                                         var response = reader.ReadLine();
+                                        if (command == null)
+                                        {
+                                            continuePlay = false;
+                                            Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                            break;
+                                        }
+
                                         if (response.StartsWith("5"))
                                         {
                                             Logger.AddToLog(response);
@@ -369,6 +408,7 @@ namespace SinkMyBattleshipWPF.ViewModels
             catch (IOException)
             {
                 Logger.AddToLog("Something went wrong.. RESTART!");
+                listener?.Stop();
             }
         }
 
@@ -420,7 +460,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                             // handskake
                             if (!handshake)
                             {
-                                command = reader.ReadLine().Trim().ToLower();
+                                command = reader.ReadLine();
 
                                 if (command == null)
                                 {
@@ -428,6 +468,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
                                     break;
                                 }
+                                command = command.Trim().ToLower();
 
                                 if (command.StartsWith("helo ", StringComparison.InvariantCultureIgnoreCase) ||
                                     command.StartsWith("hello ", StringComparison.InvariantCultureIgnoreCase))
@@ -467,7 +508,7 @@ namespace SinkMyBattleshipWPF.ViewModels
                             // start game
                             if (!start && handshake)
                             {
-                                command = reader.ReadLine().Trim().ToUpper();
+                                command = reader.ReadLine();
 
                                 if (command == null)
                                 {
@@ -475,6 +516,8 @@ namespace SinkMyBattleshipWPF.ViewModels
                                     Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
                                     break;
                                 }
+
+                                command = command.Trim().ToUpper();
 
                                 if (command.ToUpper() == "START")
                                 {
@@ -530,7 +573,16 @@ namespace SinkMyBattleshipWPF.ViewModels
                                 // wait for correct action from client
                                 while (start && Opponent.Turn == i && continuePlay)
                                 {
-                                    command = reader.ReadLine().Trim().ToUpper();
+                                    command = reader.ReadLine();
+
+                                    if (command == null)
+                                    {
+                                        continuePlay = false;
+                                        Logger.AddToLog(AnswerCodes.ConnectionClosed.GetDescription());
+                                        break;
+                                    }
+
+                                    command = command.Trim().ToUpper();
 
                                     if (string.IsNullOrEmpty(command))
                                     {
